@@ -142,9 +142,10 @@ namespace BackupPower {
                                              && u.potentialProduction           > 0
                                              && ( !hasStorage || storageLevel <= u.broker.batteryRange.min ) )
                                    .ToList();
-
+                Verse.Log.Message("Turn on!");
                 if (backups.TryRandomElementByWeight(c => c.potentialProduction, out (CompPowerTrader comp, Building_BackupPowerAttachment broker, float consumption, float currentProduction, float potentialProduction) backup)) {
                     backup.broker.TurnOn();
+                    Verse.Log.Message("Brokered");
                 }
             }
         }

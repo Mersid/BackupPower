@@ -31,6 +31,9 @@ namespace BackupPower {
         public PowerNet PowerNet => Parent?.PowerComp?.PowerNet;
         public CompPowerPlant PowerPlant => Parent?.PowerPlantComp();
 
+        private Command_Action forceFlickOff;
+        private Command_Action forceFlickOn;
+
 
         public BackupPowerStatus Status {
             get {
@@ -75,6 +78,13 @@ namespace BackupPower {
         public override IEnumerable<Gizmo> GetGizmos() {
             yield return _command_BatteryRange;
             yield return _command_RunOnBatteriesOnly;
+
+            if (DebugSettings.ShowDevGizmos)
+            {
+                yield return forceFlickOff;
+                yield return forceFlickOn;
+            }
+
             foreach (Gizmo _gizmo in base.GetGizmos()) {
                 yield return _gizmo;
             }
@@ -103,6 +113,18 @@ namespace BackupPower {
                 defaultDesc = I18n.RunOnBatteriesOnly_Desc,
                 isActive = () => runOnBatteriesOnly,
                 toggleAction = () => runOnBatteriesOnly = !runOnBatteriesOnly
+            };
+
+            forceFlickOff = new Command_Action() {
+                defaultLabel = "DEV: Force Flick Off",
+                defaultDesc = "Force Flick Off",
+                action = TurnOff
+            };
+
+            forceFlickOn = new Command_Action() {
+                defaultLabel = "DEV: Force Flick On",
+                defaultDesc = "Force Flick On",
+                action = TurnOn
             };
 
             if (!respawningAfterLoad) {
