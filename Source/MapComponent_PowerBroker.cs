@@ -99,7 +99,7 @@ namespace BackupPower
 				msg += $"\n\tcurrent: {_plant.PowerOutput}";
 			}
 
-			DebugLog.Message(msg);
+			// DebugLog.Message(msg);
 #endif
 
 			if (!(comp is CompPowerPlant plant))
@@ -142,15 +142,15 @@ namespace BackupPower
 			bool hasStorage = net.HasStorage();
 			float storageLevel = net.StorageLevel();
 
-			if (users.Count == 0)
-				Log.Message("Users is empty!");
-			else
-			{
-				foreach (var user in users)
-				{
-					Log.Message($"Comp: {user.Comp}, Broker: {user.Broker}, Consumption: {user.Consumption}, Current Production: {user.CurrentProduction}, Potential Production: {user.PotentialProduction}");
-				}
-			}
+			// if (users.Count == 0)
+			// 	Log.Message("Users is empty!");
+			// else
+			// {
+			// 	foreach (var user in users)
+			// 	{
+			// 		Log.Message($"Comp: {user.Comp}, Broker: {user.Broker}, Consumption: {user.Consumption}, Current Production: {user.CurrentProduction}, Potential Production: {user.PotentialProduction}");
+			// 	}
+			// }
 
 			// Log.Debug( $"need: {need}, production: {production}, static: {staticProduction}" );
 
@@ -179,19 +179,19 @@ namespace BackupPower
 						// && u.PotentialProduction > 0 // Some things like the Helixien generators set PotentialProduction to 0 when off. Dunno why.
 						&& (!hasStorage || storageLevel <= u.Broker.batteryRange.min)
 						).ToList();
-				Log.Message("Turn on!");
-				Log.Message($"{backups.Count}, {Mathf.Epsilon}");
 
-				foreach (PowerTraderInfo traderInfo in backups)
-				{
-					Log.Message($"{traderInfo.CurrentProduction}");
-				}
+				// Log.Message("Turn on!");
+				// Log.Message($"{backups.Count}, {Mathf.Epsilon}");
+				//
+				// foreach (PowerTraderInfo traderInfo in backups)
+				// {
+				// 	Log.Message($"{traderInfo.CurrentProduction}");
+				// }
 
 				if (backups.TryRandomElementByWeight(c => 1,
 					    out PowerTraderInfo backup))
 				{
 					backup.Broker.TurnOn();
-					Log.Message("Brokered");
 				}
 			}
 		}
