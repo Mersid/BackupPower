@@ -13,7 +13,7 @@ namespace BackupPower
 {
 	public class MapComponent_PowerBroker : MapComponent
 	{
-		public HashSet<Building_BackupPowerAttachment> brokers = new HashSet<Building_BackupPowerAttachment>();
+		public readonly HashSet<Building_BackupPowerAttachment> Brokers = new HashSet<Building_BackupPowerAttachment>();
 
 		public MapComponent_PowerBroker(Map map) : base(map)
 		{
@@ -21,7 +21,7 @@ namespace BackupPower
 
 		public static void DeregisterBroker([NotNull] Building_BackupPowerAttachment broker)
 		{
-			For(broker.Map).brokers.RemoveSafe(broker);
+			For(broker.Map).Brokers.RemoveSafe(broker);
 		}
 
 		public static MapComponent_PowerBroker For([NotNull] Map map)
@@ -34,10 +34,10 @@ namespace BackupPower
 			MapComponent_PowerBroker comp = For(broker.Map);
 			if (update)
 			{
-				_ = comp.brokers.Remove(broker);
+				_ = comp.Brokers.Remove(broker);
 			}
 
-			comp.brokers.AddSafe(broker);
+			comp.Brokers.AddSafe(broker);
 		}
 
 		public float Consumption(CompPowerTrader comp)
@@ -73,7 +73,7 @@ namespace BackupPower
 				return;
 			}
 
-			foreach (IGrouping<PowerNet, Building_BackupPowerAttachment> group in brokers.Where(b => b.PowerNet != null)
+			foreach (IGrouping<PowerNet, Building_BackupPowerAttachment> group in Brokers.Where(b => b.PowerNet != null)
 				         .GroupBy(b => b.PowerNet))
 			{
 				PowerNetUpdate(group.Key, new HashSet<Building_BackupPowerAttachment>(group));
@@ -126,7 +126,7 @@ namespace BackupPower
 		public void PowerNetUpdate(PowerNet net, HashSet<Building_BackupPowerAttachment> brokers)
 		{
 			// get desired power
-			List<PowerTraderInfo> users = net.powerComps.Select(p => new PowerTraderInfo()
+			List<PowerTraderInfo> users = net.powerComps.Select(p => new PowerTraderInfo
 			{
 				Comp = p,
 				Broker = p.parent is Building building

@@ -36,7 +36,7 @@ namespace BackupPower
 				canvas = canvas.AtZero();
 				Rect buttonRect = canvas.AtZero().TopPartPixels(Height);
 				GUI.color = mouseOver
-					? Resources.blueish
+					? Resources.Blueish
 					: Color.white;
 				Widgets.DrawAtlas(buttonRect, BGTexture);
 				GUI.color = Color.white;
@@ -73,14 +73,14 @@ namespace BackupPower
 				}
 
 				// battery
-				GUI.color = Resources.whiteish;
+				GUI.color = Resources.Whiteish;
 				Rect batteryRect = innerButtonRect.MiddlePart(.2f, .2f).ContractedBy(6f);
 				GUI.DrawTexture(batteryRect, Resources.Battery);
 
 				if (parent.PowerNet?.batteryComps.Any() ?? false)
 				{
 					float pct = parent.PowerNet.StorageLevel();
-					GUI.color = Resources.blueish;
+					GUI.color = Resources.Blueish;
 					GUI.DrawTextureWithTexCoords(batteryRect.BottomPart(pct), Resources.Battery,
 						new Rect(0, 0, 1, pct));
 				}
@@ -90,10 +90,10 @@ namespace BackupPower
 				float maxY = batteryRect.yMin + (batteryRect.height * (1 - parent.BatteryRange.max));
 				Utilities.DrawLineDashed(new Vector2(batteryRect.xMin - 5, minY),
 					new Vector2(batteryRect.xMin + (batteryRect.width * 2 / 3f), minY),
-					Resources.greenish, 2);
+					Resources.Greenish, 2);
 				Utilities.DrawLineDashed(new Vector2(batteryRect.xMax + 5, maxY),
 					new Vector2(batteryRect.xMin + (batteryRect.width * 1 / 3f), maxY),
-					Resources.reddish, 2);
+					Resources.Reddish, 2);
 
 				GUI.color = Color.white;
 

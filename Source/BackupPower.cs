@@ -1,11 +1,13 @@
 // BackupPower.cs
 // Copyright Karel Kroeze, 2020-2020
 
+using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 
 namespace BackupPower
 {
+	[UsedImplicitly] // By RimWorld
 	public class BackupPower : Mod
 	{
 		public static Settings Settings { get; private set; }

@@ -2,10 +2,12 @@
 // Copyright Karel Kroeze, 2020-2020
 
 using System.Linq;
+using JetBrains.Annotations;
 using Verse;
 
 namespace BackupPower
 {
+	[UsedImplicitly] // By the place worker to determine if it's valid to place the backup power box on a building
 	public class PlaceWorker_OnFlickablePowerPlant : PlaceWorker
 	{
 		public override AcceptanceReport AllowsPlacing(BuildableDef checkingDef, IntVec3 loc, Rot4 rot, Map map,

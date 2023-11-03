@@ -13,38 +13,38 @@ namespace BackupPower
 {
 	public static class Utilities
 	{
-		private static readonly ConditionalWeakTable<ThingWithComps, CompBreakdownable> _breakdownables =
+		private static readonly ConditionalWeakTable<ThingWithComps, CompBreakdownable> Breakdownables =
 			new ConditionalWeakTable<ThingWithComps, CompBreakdownable>();
 
-		private static readonly MethodInfo _desiredOutputGetter_MI = typeof(CompPowerPlant)
+		private static readonly MethodInfo DesiredOutputGetterMethodInfo = typeof(CompPowerPlant)
 			.GetProperty(
 				"DesiredPowerOutput",
 				BindingFlags.Instance |
 				BindingFlags.NonPublic)
 			.GetMethod;
 
-		private static readonly FieldInfo _flickable_wantSwitchOn_FI =
+		private static readonly FieldInfo FlickableWantSwitchOnFiendInfo =
 			typeof(CompFlickable).GetField("wantSwitchOn", BindingFlags.Instance | BindingFlags.NonPublic);
 
-		private static readonly ConditionalWeakTable<ThingWithComps, CompFlickable> _flickables =
+		private static readonly ConditionalWeakTable<ThingWithComps, CompFlickable> Flickables =
 			new ConditionalWeakTable<ThingWithComps, CompFlickable>();
 
-		private static readonly ConditionalWeakTable<ThingWithComps, CompPowerPlant> _powerplants =
+		private static readonly ConditionalWeakTable<ThingWithComps, CompPowerPlant> Powerplants =
 			new ConditionalWeakTable<ThingWithComps, CompPowerPlant>();
 
-		private static readonly ConditionalWeakTable<ThingWithComps, CompRefuelable> _refuelables =
+		private static readonly ConditionalWeakTable<ThingWithComps, CompRefuelable> Refuelables =
 			new ConditionalWeakTable<ThingWithComps, CompRefuelable>();
 
 		public static void AddSafe<T>(this HashSet<T> set, T item)
 		{
 			if (item == null)
 			{
-				Verse.Log.ErrorOnce("tried adding null element to hashset", 123411);
+				Log.ErrorOnce("tried adding null element to hashset", 123411);
 			}
 
 			if (set.Contains(item))
 			{
-				Verse.Log.ErrorOnce("tried adding duplicate item to hashset", 123412);
+				Log.ErrorOnce("tried adding duplicate item to hashset", 123412);
 			}
 
 			_ = set.Add(item);
@@ -62,19 +62,19 @@ namespace BackupPower
 
 		public static CompBreakdownable BreakdownableComp(this ThingWithComps parent)
 		{
-			if (_breakdownables.TryGetValue(parent, out CompBreakdownable breakdownable))
+			if (Breakdownables.TryGetValue(parent, out CompBreakdownable breakdownable))
 			{
 				return breakdownable;
 			}
 
 			breakdownable = parent.GetComp<CompBreakdownable>();
-			_breakdownables.Add(parent, breakdownable);
+			Breakdownables.Add(parent, breakdownable);
 			return breakdownable;
 		}
 
 		public static float DesiredOutput(this CompPowerPlant plant)
 		{
-			return (float)_desiredOutputGetter_MI.Invoke(plant, null);
+			return (float)DesiredOutputGetterMethodInfo.Invoke(plant, null);
 		}
 
 		public static void DrawLineDashed(Vector2 start, Vector2 end, Color? color = null, float size = 1,
@@ -96,13 +96,13 @@ namespace BackupPower
 
 		public static CompFlickable FlickableComp(this ThingWithComps parent)
 		{
-			if (_flickables.TryGetValue(parent, out CompFlickable flickable))
+			if (Flickables.TryGetValue(parent, out CompFlickable flickable))
 			{
 				return flickable;
 			}
 
 			flickable = parent.GetComp<CompFlickable>();
-			_flickables.Add(parent, flickable);
+			Flickables.Add(parent, flickable);
 			return flickable;
 		}
 
@@ -115,7 +115,7 @@ namespace BackupPower
 
 			if (flickable.WantsFlick())
 			{
-				_flickable_wantSwitchOn_FI.SetValue(flickable, mode);
+				FlickableWantSwitchOnFiendInfo.SetValue(flickable, mode);
 			}
 		}
 
@@ -135,25 +135,25 @@ namespace BackupPower
 
 		public static CompPowerPlant PowerPlantComp(this ThingWithComps parent)
 		{
-			if (_powerplants.TryGetValue(parent, out CompPowerPlant powerplant))
+			if (Powerplants.TryGetValue(parent, out CompPowerPlant powerplant))
 			{
 				return powerplant;
 			}
 
 			powerplant = parent.GetComp<CompPowerPlant>();
-			_powerplants.Add(parent, powerplant);
+			Powerplants.Add(parent, powerplant);
 			return powerplant;
 		}
 
 		public static CompRefuelable RefuelableComp(this ThingWithComps parent)
 		{
-			if (_refuelables.TryGetValue(parent, out CompRefuelable refuelable))
+			if (Refuelables.TryGetValue(parent, out CompRefuelable refuelable))
 			{
 				return refuelable;
 			}
 
 			refuelable = parent.GetComp<CompRefuelable>();
-			_refuelables.Add(parent, refuelable);
+			Refuelables.Add(parent, refuelable);
 			return refuelable;
 		}
 
@@ -161,12 +161,12 @@ namespace BackupPower
 		{
 			if (item == null)
 			{
-				Verse.Log.ErrorOnce("tried removing null element from hashset", 123413);
+				Log.ErrorOnce("tried removing null element from hashset", 123413);
 			}
 
 			if (!set.Contains(item))
 			{
-				Verse.Log.ErrorOnce("tried removing item from hashset that it does not have", 123414);
+				Log.ErrorOnce("tried removing item from hashset that it does not have", 123414);
 			}
 
 			_ = set.Remove(item);

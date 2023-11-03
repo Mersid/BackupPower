@@ -75,7 +75,7 @@ namespace BackupPower
 			}
 			catch (Exception err)
 			{
-				Verse.Log.Error($"Error deregistering broker: {err}");
+				Log.Error($"Error deregistering broker: {err}");
 			}
 
 			base.Destroy(mode);
@@ -102,9 +102,9 @@ namespace BackupPower
 				yield return commandForceFlickOn;
 			}
 
-			foreach (Gizmo _gizmo in base.GetGizmos())
+			foreach (Gizmo gizmo in base.GetGizmos())
 			{
-				yield return _gizmo;
+				yield return gizmo;
 			}
 		}
 
@@ -127,7 +127,7 @@ namespace BackupPower
 		{
 			base.SpawnSetup(map, respawningAfterLoad);
 			commandBatteryRange = new Command_BatteryRange(this);
-			commandRunOnBatteriesOnly = new Command_Toggle()
+			commandRunOnBatteriesOnly = new Command_Toggle
 			{
 				icon = DefDatabase<ThingDef>.GetNamed("Battery").uiIcon,
 				iconProportions = new Vector2(2, 3),
@@ -137,23 +137,23 @@ namespace BackupPower
 				toggleAction = () => RunOnBatteriesOnly = !RunOnBatteriesOnly
 			};
 
-			commandForceFlickOff = new Command_Action()
+			commandForceFlickOff = new Command_Action
 			{
 				defaultLabel = I18n.DebugForceFlickOffLabel,
 				defaultDesc = I18n.DebugForceFlickOffDesc,
 				action = TurnOff
 			};
 
-			commandForceFlickOn = new Command_Action()
+			commandForceFlickOn = new Command_Action
 			{
 				defaultLabel = I18n.DebugForceFlickOnLabel,
 				defaultDesc = I18n.DebugForceFlickOnDesc,
 				action = TurnOn
 			};
 
-			commandEnabled = new Command_Toggle()
+			commandEnabled = new Command_Toggle
 			{
-				icon = BackupPowerStatic.PowerTexture,
+				icon = Resources.PowerTexture,
 				defaultLabel = I18n.BatteryBackupEnabledLabel,
 				defaultDesc = I18n.BatteryBackupEnabledDesc,
 				isActive = () => Enabled,

@@ -8,30 +8,30 @@ namespace BackupPower
 {
 	public static class I18n
 	{
-		public static string BackupPower = "Fluffy.BackupPower".Translate();
-		public static string PlaceWorker_PlaceOnPowerPlant = Translate("PlaceWorker.PlaceOnPowerPlant");
-		public static string PlaceWorker_PlaceOnFlickable = Translate("PlaceWorker.PlaceOnFlickable");
-		public static string PlaceWorker_OnlyOneAttachmentAllowed = Translate("PlaceWorker.OnlyOneAttachmentAllowed");
-		public static string Settings_UpdateInterval_Tooltip = Translate("Settings.UpdateInterval.Tooltip");
-		public static string Settings_MinimumOnTime_Tooltip = Translate("Settings.MinimumOnTime.Tooltip");
-		public static string Generator = Translate("Generator");
-		public static string CommandLabel = Translate("CommandLabel");
+		public static readonly string BackupPower = "Fluffy.BackupPower".Translate();
+		public static readonly string PlaceWorker_PlaceOnPowerPlant = Translate("PlaceWorker.PlaceOnPowerPlant");
+		public static readonly string PlaceWorker_PlaceOnFlickable = Translate("PlaceWorker.PlaceOnFlickable");
+		public static readonly string PlaceWorker_OnlyOneAttachmentAllowed = Translate("PlaceWorker.OnlyOneAttachmentAllowed");
+		public static readonly string Settings_UpdateInterval_Tooltip = Translate("Settings.UpdateInterval.Tooltip");
+		public static readonly string Settings_MinimumOnTime_Tooltip = Translate("Settings.MinimumOnTime.Tooltip");
+		public static readonly string Generator = Translate("Generator");
+		public static readonly string CommandLabel = Translate("CommandLabel");
 
-		public static string CopyTo = Translate("CopyTo");
-		public static string CopyTo_Room = Translate("CopyTo.Room");
-		public static string CopyTo_Connected = Translate("CopyTo.Connected");
-		public static string CopyTo_All = Translate("CopyTo.All");
+		public static readonly string CopyTo = Translate("CopyTo");
+		public static readonly string CopyTo_Room = Translate("CopyTo.Room");
+		public static readonly string CopyTo_Connected = Translate("CopyTo.Connected");
+		public static readonly string CopyTo_All = Translate("CopyTo.All");
 
-		public static string RunOnBatteriesOnlyLabel = Translate("RunOnBatteriesOnly.Label");
-		public static string RunOnBatteriesOnlyDesc = Translate("RunOnBatteriesOnly.Desc");
+		public static readonly string RunOnBatteriesOnlyLabel = Translate("RunOnBatteriesOnly.Label");
+		public static readonly string RunOnBatteriesOnlyDesc = Translate("RunOnBatteriesOnly.Desc");
 
-		public static string DebugForceFlickOffLabel = Translate("ForceFlickOff.Label");
-		public static string DebugForceFlickOffDesc = Translate("ForceFlickOff.Desc");
-		public static string DebugForceFlickOnLabel = Translate("ForceFlickOn.Label");
-		public static string DebugForceFlickOnDesc = Translate("ForceFlickOn.Desc");
+		public static readonly string DebugForceFlickOffLabel = Translate("ForceFlickOff.Label");
+		public static readonly string DebugForceFlickOffDesc = Translate("ForceFlickOff.Desc");
+		public static readonly string DebugForceFlickOnLabel = Translate("ForceFlickOn.Label");
+		public static readonly string DebugForceFlickOnDesc = Translate("ForceFlickOn.Desc");
 
-		public static string BatteryBackupEnabledLabel = Translate("BatteryBackupEnabled.Label");
-		public static string BatteryBackupEnabledDesc = Translate("BatteryBackupEnabled.Desc");
+		public static readonly string BatteryBackupEnabledLabel = Translate("BatteryBackupEnabled.Label");
+		public static readonly string BatteryBackupEnabledDesc = Translate("BatteryBackupEnabled.Desc");
 
 
 		public static string AttachmentDestroyedBecauseParentGone(string label)
@@ -79,12 +79,12 @@ namespace BackupPower
 
 		public static string TurnsOffAt(float value)
 		{
-			return Translate("TurnsOffAbove", value.ToStringPercent().Colorize(Resources.reddish));
+			return Translate("TurnsOffAbove", value.ToStringPercent().Colorize(Resources.Reddish));
 		}
 
 		public static string TurnsOnAt(float value)
 		{
-			return Translate("TurnsOnBelow", value.ToStringPercent().Colorize(Resources.greenish));
+			return Translate("TurnsOnBelow", value.ToStringPercent().Colorize(Resources.Greenish));
 		}
 
 		private static string Key(string key)
