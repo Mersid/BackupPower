@@ -157,10 +157,12 @@ namespace BackupPower
 			if (production > need || (hasStorage && storageLevel > 0))
 			{
 				// try to shut backups off
-				List<PowerTraderInfo> backups = users.Where(u => u.Broker != null
+				List<PowerTraderInfo> backups = users.Where(u =>
+						u.Broker != null
+						&& u.Broker.Enabled
 						&& u.CurrentProduction > 0
-						&& (u.CurrentProduction <= (production - need) || u.Broker.runOnBatteriesOnly)
-						&& ((!hasStorage && !u.Broker.runOnBatteriesOnly) || storageLevel >= u.Broker.batteryRange.max)
+						&& (u.CurrentProduction <= (production - need) || u.Broker.RunOnBatteriesOnly)
+						&& ((!hasStorage && !u.Broker.RunOnBatteriesOnly) || storageLevel >= u.Broker.BatteryRange.max)
 						&& u.Broker.CanTurnOff())
 					.ToList();
 
@@ -174,10 +176,12 @@ namespace BackupPower
 			if (production < need || (hasStorage && storageLevel < 1))
 			{
 				// try to turn backups on
-				List<PowerTraderInfo> backups = users.Where(u => u.Broker != null
+				List<PowerTraderInfo> backups = users.Where(u =>
+						u.Broker != null
+						&& u.Broker.Enabled
 						&& Math.Abs(u.CurrentProduction) < Mathf.Epsilon
 						// && u.PotentialProduction > 0 // Some things like the Helixien generators set PotentialProduction to 0 when off. Dunno why.
-						&& (!hasStorage || storageLevel <= u.Broker.batteryRange.min)
+						&& (!hasStorage || storageLevel <= u.Broker.BatteryRange.min)
 						).ToList();
 
 				// Log.Message("Turn on!");

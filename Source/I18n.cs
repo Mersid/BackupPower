@@ -22,6 +22,17 @@ namespace BackupPower
 		public static string CopyTo_Connected = Translate("CopyTo.Connected");
 		public static string CopyTo_All = Translate("CopyTo.All");
 
+		public static string RunOnBatteriesOnlyLabel = Translate("RunOnBatteriesOnly.Label");
+		public static string RunOnBatteriesOnlyDesc = Translate("RunOnBatteriesOnly.Desc");
+
+		public static string DebugForceFlickOffLabel = Translate("ForceFlickOff.Label");
+		public static string DebugForceFlickOffDesc = Translate("ForceFlickOff.Desc");
+		public static string DebugForceFlickOnLabel = Translate("ForceFlickOn.Label");
+		public static string DebugForceFlickOnDesc = Translate("ForceFlickOn.Desc");
+
+		public static string BatteryBackupEnabledLabel = Translate("BatteryBackupEnabled.Label");
+		public static string BatteryBackupEnabledDesc = Translate("BatteryBackupEnabled.Desc");
+
 
 		public static string AttachmentDestroyedBecauseParentGone(string label)
 		{
@@ -75,9 +86,6 @@ namespace BackupPower
 		{
 			return Translate("TurnsOnBelow", value.ToStringPercent().Colorize(Resources.greenish));
 		}
-
-		public static string RunOnBatteriesOnly_Label = Translate("RunOnBatteriesOnly.Label");
-		public static string RunOnBatteriesOnly_Desc = Translate("RunOnBatteriesOnly.Desc");
 
 		private static string Key(string key)
 		{

@@ -18,14 +18,18 @@ namespace BackupPower
 
 	public class Building_BackupPowerAttachment : Building
 	{
-		public FloatRange batteryRange = FloatRange.One;
-		public bool runOnBatteriesOnly = true;
-		private Command_BatteryRange _command_BatteryRange;
-		private Command_Toggle _command_RunOnBatteriesOnly;
+		public FloatRange BatteryRange = FloatRange.One;
+		public bool RunOnBatteriesOnly = true;
+		public bool Enabled;
+		private Command_BatteryRange commandBatteryRange;
+		private Command_Toggle commandRunOnBatteriesOnly;
+		private Command_Toggle commandEnabled;
+		private Command_Action commandForceFlickOff;
+		private Command_Action commandForceFlickOn;
 
-		private int _lastOnTick;
+		private int lastOnTick;
 
-		private Color _prevColor;
+		private Color prevColor;
 		public override Color DrawColor => Resources.StatusColor(Status);
 		public CompFlickable Flickable => Parent?.FlickableComp();
 
@@ -33,10 +37,6 @@ namespace BackupPower
 
 		public PowerNet PowerNet => Parent?.PowerComp?.PowerNet;
 		public CompPowerPlant PowerPlant => Parent?.PowerPlantComp();
-
-		private Command_Action forceFlickOff;
-		private Command_Action forceFlickOn;
-
 
 		public BackupPowerStatus Status
 		{
@@ -59,12 +59,12 @@ namespace BackupPower
 
 		public bool CanTurnOff()
 		{
-			return _lastOnTick + BackupPower.Settings.MinimumOnTime < Find.TickManager.TicksGame;
+			return lastOnTick + BackupPower.Settings.MinimumOnTime < Find.TickManager.TicksGame;
 		}
 
 		public void CopySettingsTo(Building_BackupPowerAttachment other)
 		{
-			other.batteryRange = batteryRange;
+			other.BatteryRange = BatteryRange;
 		}
 
 		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
@@ -85,19 +85,21 @@ namespace BackupPower
 		{
 			base.ExposeData();
 
-			Scribe_Values.Look(ref batteryRange, "batteryRange", FloatRange.One);
-			Scribe_Values.Look(ref runOnBatteriesOnly, "runOnBatteriesOnly", true);
+			Scribe_Values.Look(ref BatteryRange, "batteryRange", FloatRange.One);
+			Scribe_Values.Look(ref RunOnBatteriesOnly, "runOnBatteriesOnly", true);
+			Scribe_Values.Look(ref Enabled, "enabled", true);
 		}
 
 		public override IEnumerable<Gizmo> GetGizmos()
 		{
-			yield return _command_BatteryRange;
-			yield return _command_RunOnBatteriesOnly;
+			yield return commandBatteryRange;
+			yield return commandRunOnBatteriesOnly;
+			yield return commandEnabled;
 
 			if (DebugSettings.ShowDevGizmos)
 			{
-				yield return forceFlickOff;
-				yield return forceFlickOn;
+				yield return commandForceFlickOff;
+				yield return commandForceFlickOn;
 			}
 
 			foreach (Gizmo _gizmo in base.GetGizmos())
@@ -109,7 +111,7 @@ namespace BackupPower
 		public override string GetInspectString()
 		{
 			string desc = base.GetInspectString();
-			return I18n.StatusString(Status, batteryRange.min, batteryRange.max, PowerNet.StorageLevel()) +
+			return I18n.StatusString(Status, BatteryRange.min, BatteryRange.max, PowerNet.StorageLevel()) +
 			       (desc.NullOrEmpty() ? "" : $"\n{desc}");
 		}
 
@@ -118,35 +120,44 @@ namespace BackupPower
 			base.Notify_ColorChanged();
 			// again, for good measure.
 			Map.mapDrawer.MapMeshDirty(Position, MapMeshFlag.Things);
-			_prevColor = DrawColor;
+			prevColor = DrawColor;
 		}
 
 		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
 			base.SpawnSetup(map, respawningAfterLoad);
-			_command_BatteryRange = new Command_BatteryRange(this);
-			_command_RunOnBatteriesOnly = new Command_Toggle()
+			commandBatteryRange = new Command_BatteryRange(this);
+			commandRunOnBatteriesOnly = new Command_Toggle()
 			{
 				icon = DefDatabase<ThingDef>.GetNamed("Battery").uiIcon,
 				iconProportions = new Vector2(2, 3),
-				defaultLabel = I18n.RunOnBatteriesOnly_Label,
-				defaultDesc = I18n.RunOnBatteriesOnly_Desc,
-				isActive = () => runOnBatteriesOnly,
-				toggleAction = () => runOnBatteriesOnly = !runOnBatteriesOnly
+				defaultLabel = I18n.RunOnBatteriesOnlyLabel,
+				defaultDesc = I18n.RunOnBatteriesOnlyDesc,
+				isActive = () => RunOnBatteriesOnly,
+				toggleAction = () => RunOnBatteriesOnly = !RunOnBatteriesOnly
 			};
 
-			forceFlickOff = new Command_Action()
+			commandForceFlickOff = new Command_Action()
 			{
-				defaultLabel = "DEV: Force Flick Off",
-				defaultDesc = "Force Flick Off",
+				defaultLabel = I18n.DebugForceFlickOffLabel,
+				defaultDesc = I18n.DebugForceFlickOffDesc,
 				action = TurnOff
 			};
 
-			forceFlickOn = new Command_Action()
+			commandForceFlickOn = new Command_Action()
 			{
-				defaultLabel = "DEV: Force Flick On",
-				defaultDesc = "Force Flick On",
+				defaultLabel = I18n.DebugForceFlickOnLabel,
+				defaultDesc = I18n.DebugForceFlickOnDesc,
 				action = TurnOn
+			};
+
+			commandEnabled = new Command_Toggle()
+			{
+				icon = BackupPowerStatic.PowerTexture,
+				defaultLabel = I18n.BatteryBackupEnabledLabel,
+				defaultDesc = I18n.BatteryBackupEnabledDesc,
+				isActive = () => Enabled,
+				toggleAction = () => Enabled = !Enabled
 			};
 
 			if (!respawningAfterLoad)
@@ -157,7 +168,7 @@ namespace BackupPower
 
 		public override void Tick()
 		{
-			if (this.IsHashIntervalTick(60) && _prevColor != DrawColor)
+			if (this.IsHashIntervalTick(60) && prevColor != DrawColor)
 			{
 				Notify_ColorChanged();
 			}
@@ -180,7 +191,7 @@ namespace BackupPower
 
 		public void TurnOn()
 		{
-			_lastOnTick = Find.TickManager.TicksGame;
+			lastOnTick = Find.TickManager.TicksGame;
 			Flickable.Force(true);
 		}
 

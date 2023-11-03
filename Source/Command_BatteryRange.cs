@@ -19,8 +19,8 @@ namespace BackupPower
 		}
 
 		public override string Desc =>
-			I18n.StatusString(parent.Status, parent.batteryRange.min,
-				parent.batteryRange.max, parent.PowerNet.StorageLevel());
+			I18n.StatusString(parent.Status, parent.BatteryRange.min,
+				parent.BatteryRange.max, parent.PowerNet.StorageLevel());
 
 		public override string Label => I18n.CommandLabel;
 
@@ -57,19 +57,19 @@ namespace BackupPower
 				// sliders
 				Rect minSliderRect = innerButtonRect.LeftPart(.2f);
 				Rect maxSliderRect = innerButtonRect.RightPart(.2f);
-				float newMin = GUI.VerticalSlider(minSliderRect, parent.batteryRange.min, 1, 0);
-				float newMax = GUI.VerticalSlider(maxSliderRect, parent.batteryRange.max, 1, 0);
+				float newMin = GUI.VerticalSlider(minSliderRect, parent.BatteryRange.min, 1, 0);
+				float newMax = GUI.VerticalSlider(maxSliderRect, parent.BatteryRange.max, 1, 0);
 
 				// enforce min < max to avoid flicker
-				if (Mathf.Abs(newMin - parent.batteryRange.min) > Mathf.Epsilon)
+				if (Mathf.Abs(newMin - parent.BatteryRange.min) > Mathf.Epsilon)
 				{
-					parent.batteryRange.min = newMin;
-					parent.batteryRange.max = Mathf.Max(parent.batteryRange.min, parent.batteryRange.max);
+					parent.BatteryRange.min = newMin;
+					parent.BatteryRange.max = Mathf.Max(parent.BatteryRange.min, parent.BatteryRange.max);
 				}
-				else if (Mathf.Abs(newMax - parent.batteryRange.max) > Mathf.Epsilon)
+				else if (Mathf.Abs(newMax - parent.BatteryRange.max) > Mathf.Epsilon)
 				{
-					parent.batteryRange.max = newMax;
-					parent.batteryRange.min = Mathf.Min(parent.batteryRange.min, parent.batteryRange.max);
+					parent.BatteryRange.max = newMax;
+					parent.BatteryRange.min = Mathf.Min(parent.BatteryRange.min, parent.BatteryRange.max);
 				}
 
 				// battery
@@ -86,8 +86,8 @@ namespace BackupPower
 				}
 
 				// draw target lines
-				float minY = batteryRect.yMin + (batteryRect.height * (1 - parent.batteryRange.min));
-				float maxY = batteryRect.yMin + (batteryRect.height * (1 - parent.batteryRange.max));
+				float minY = batteryRect.yMin + (batteryRect.height * (1 - parent.BatteryRange.min));
+				float maxY = batteryRect.yMin + (batteryRect.height * (1 - parent.BatteryRange.max));
 				Utilities.DrawLineDashed(new Vector2(batteryRect.xMin - 5, minY),
 					new Vector2(batteryRect.xMin + (batteryRect.width * 2 / 3f), minY),
 					Resources.greenish, 2);

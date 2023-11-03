@@ -8,13 +8,14 @@ namespace BackupPower
 {
 	public class BackupPower : Mod
 	{
+		public static Settings Settings { get; private set; }
+
+
 		public BackupPower(ModContentPack content) : base(content)
 		{
 			// initialize settings
 			Settings = GetSettings<Settings>();
 		}
-
-		public static Settings Settings { get; private set; }
 
 		public override void DoSettingsWindowContents(Rect inRect)
 		{
