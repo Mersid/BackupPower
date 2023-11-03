@@ -99,7 +99,7 @@ namespace BackupPower
 				msg += $"\n\tcurrent: {_plant.PowerOutput}";
 			}
 
-			Log.Message(msg);
+			DebugLog.Message(msg);
 #endif
 
 			if (!(comp is CompPowerPlant plant))
@@ -126,57 +126,72 @@ namespace BackupPower
 		public void PowerNetUpdate(PowerNet net, HashSet<Building_BackupPowerAttachment> brokers)
 		{
 			// get desired power
-			var users = net.powerComps
-				.Select(p => (comp: p,
-					broker: p.parent is Building building
-						? brokers.FirstOrDefault(b => b.Parent == building)
-						: null,
-					consumption: Consumption(p),
-					currentProduction: CurrentProduction(p),
-					potentialProduction: PotentialProduction(p))).ToList();
+			List<PowerTraderInfo> users = net.powerComps.Select(p => new PowerTraderInfo()
+			{
+				Comp = p,
+				Broker = p.parent is Building building
+					? brokers.FirstOrDefault(b => b.Parent == building)
+					: null,
+				Consumption = Consumption(p),
+				CurrentProduction = CurrentProduction(p),
+				PotentialProduction = PotentialProduction(p)
+			}).ToList();
 
-			float need = users.Sum(u => u.consumption);
-			float production = users.Sum(u => u.currentProduction);
+			float need = users.Sum(u => u.Consumption);
+			float production = users.Sum(u => u.CurrentProduction);
 			bool hasStorage = net.HasStorage();
 			float storageLevel = net.StorageLevel();
+
+			if (users.Count == 0)
+				Log.Message("Users is empty!");
+			else
+			{
+				foreach (var user in users)
+				{
+					Log.Message($"Comp: {user.Comp}, Broker: {user.Broker}, Consumption: {user.Consumption}, Current Production: {user.CurrentProduction}, Potential Production: {user.PotentialProduction}");
+				}
+			}
 
 			// Log.Debug( $"need: {need}, production: {production}, static: {staticProduction}" );
 
 			if (production > need || (hasStorage && storageLevel > 0))
 			{
 				// try to shut backups off
-				List<(CompPowerTrader comp, Building_BackupPowerAttachment broker, float consumption, float
-					currentProduction, float potentialProduction)> backups = users.Where(u => u.broker != null
-						&& u.currentProduction > 0
-						&& (u.currentProduction <= (production - need) || u.broker.runOnBatteriesOnly)
-						&& ((!hasStorage && !u.broker.runOnBatteriesOnly) || storageLevel >= u.broker.batteryRange.max)
-						&& u.broker.CanTurnOff())
+				List<PowerTraderInfo> backups = users.Where(u => u.Broker != null
+						&& u.CurrentProduction > 0
+						&& (u.CurrentProduction <= (production - need) || u.Broker.runOnBatteriesOnly)
+						&& ((!hasStorage && !u.Broker.runOnBatteriesOnly) || storageLevel >= u.Broker.batteryRange.max)
+						&& u.Broker.CanTurnOff())
 					.ToList();
 
-				if (backups.TryRandomElementByWeight(c => 1 / c.currentProduction,
-					    out (CompPowerTrader comp, Building_BackupPowerAttachment broker, float consumption, float
-					    currentProduction, float potentialProduction) backup))
+				if (backups.TryRandomElementByWeight(c => 1 / c.CurrentProduction,
+					    out PowerTraderInfo backup))
 				{
-					backup.broker.TurnOff();
+					backup.Broker.TurnOff();
 				}
 			}
 
 			if (production < need || (hasStorage && storageLevel < 1))
 			{
 				// try to turn backups on
-				List<(CompPowerTrader comp, Building_BackupPowerAttachment broker, float consumption, float
-					currentProduction, float potentialProduction)> backups = users.Where(u => u.broker != null
-						&& Math.Abs(u.currentProduction) < Mathf.Epsilon
-						&& u.potentialProduction > 0
-						&& (!hasStorage || storageLevel <= u.broker.batteryRange.min))
-					.ToList();
-				Verse.Log.Message("Turn on!");
-				if (backups.TryRandomElementByWeight(c => c.potentialProduction,
-					    out (CompPowerTrader comp, Building_BackupPowerAttachment broker, float consumption, float
-					    currentProduction, float potentialProduction) backup))
+				List<PowerTraderInfo> backups = users.Where(u => u.Broker != null
+						&& Math.Abs(u.CurrentProduction) < Mathf.Epsilon
+						// && u.PotentialProduction > 0 // Some things like the Helixien generators set PotentialProduction to 0 when off. Dunno why.
+						&& (!hasStorage || storageLevel <= u.Broker.batteryRange.min)
+						).ToList();
+				Log.Message("Turn on!");
+				Log.Message($"{backups.Count}, {Mathf.Epsilon}");
+
+				foreach (PowerTraderInfo traderInfo in backups)
 				{
-					backup.broker.TurnOn();
-					Verse.Log.Message("Brokered");
+					Log.Message($"{traderInfo.CurrentProduction}");
+				}
+
+				if (backups.TryRandomElementByWeight(c => 1,
+					    out PowerTraderInfo backup))
+				{
+					backup.Broker.TurnOn();
+					Log.Message("Brokered");
 				}
 			}
 		}

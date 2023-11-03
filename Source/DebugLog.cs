@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace BackupPower
 {
-	internal static class Log
+	internal static class DebugLog
 	{
 		[Conditional("DEBUG")]
 		public static void Debug(string msg)
