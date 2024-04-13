@@ -119,7 +119,7 @@ namespace BackupPower
 		{
 			base.Notify_ColorChanged();
 			// again, for good measure.
-			Map.mapDrawer.MapMeshDirty(Position, MapMeshFlag.Things);
+			Map.mapDrawer.MapMeshDirty(Position, MapMeshFlagDefOf.Things);
 			prevColor = DrawColor;
 		}
 

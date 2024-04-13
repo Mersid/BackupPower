@@ -27,8 +27,13 @@ None (yet).</description>
     <url>https://github.com/fluffy-mods/BackupPower</url>
     <supportedVersions>
         <li>1.4</li>
+        <li>1.5</li>
     </supportedVersions>
     <loadAfter>
         <li>Ludeon.RimWorld</li>
+        <li>Ludeon.RimWorld.Royalty</li>
+        <li>Ludeon.RimWorld.Ideology</li>
+        <li>Ludeon.RimWorld.Biotech</li>
+        <li>Ludeon.RimWorld.Anomaly</li>
     </loadAfter>
 </ModMetaData>
