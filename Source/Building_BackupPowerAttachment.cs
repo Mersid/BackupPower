@@ -20,7 +20,7 @@ namespace BackupPower
 	{
 		public FloatRange BatteryRange = FloatRange.One;
 		public bool RunOnBatteriesOnly = true;
-		public bool Enabled;
+		public bool Enabled = true;
 		private Command_BatteryRange commandBatteryRange;
 		private Command_Toggle commandRunOnBatteriesOnly;
 		private Command_Toggle commandEnabled;
