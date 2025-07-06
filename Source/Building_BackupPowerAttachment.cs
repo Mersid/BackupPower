@@ -166,7 +166,7 @@ namespace BackupPower
 			}
 		}
 
-		public override void Tick()
+		protected override void Tick()
 		{
 			if (this.IsHashIntervalTick(60) && prevColor != DrawColor)
 			{
