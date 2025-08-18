@@ -3,19 +3,18 @@
 
 using System.Diagnostics;
 
-namespace BackupPower
-{
-	internal static class DebugLog
-	{
-		[Conditional("DEBUG")]
-		public static void Debug(string msg)
-		{
-			Message(msg);
-		}
+namespace BackupPower;
 
-		public static void Message(string msg)
-		{
-			Verse.Log.Message($"BackupPower :: {msg}");
-		}
+internal static class DebugLog
+{
+	[Conditional("DEBUG")]
+	public static void Debug(string msg)
+	{
+		Message(msg);
+	}
+
+	public static void Message(string msg)
+	{
+		Verse.Log.Message($"BackupPower :: {msg}");
 	}
 }
