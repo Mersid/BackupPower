@@ -46,4 +46,6 @@
     <Fluffy.BackupPower.BatteryBackupEnabled.Label>Enabled</Fluffy.BackupPower.BatteryBackupEnabled.Label>
     <Fluffy.BackupPower.BatteryBackupEnabled.Desc>Enable backup power for this building. If disabled, the backup power box will not enable or disable the generator, regardless of the current power situation.</Fluffy.BackupPower.BatteryBackupEnabled.Desc>
 
+    <Fluffy.BackupPower.CommandFlickOnOff.Label>Remote power toggle</Fluffy.BackupPower.CommandFlickOnOff.Label>
+    <Fluffy.BackupPower.CommandFlickOnOff.Desc>Remotely turn the power on or off for this building.</Fluffy.BackupPower.CommandFlickOnOff.Desc>
 </LanguageData>

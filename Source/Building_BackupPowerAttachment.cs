@@ -33,7 +33,7 @@ public class Building_BackupPowerAttachment : Building
 	{
 		get
 		{
-			if (Parent.BreakdownableComp().BrokenDown || !Parent.RefuelableComp().HasFuel)
+			if (Parent is null || Parent.BreakdownableComp().BrokenDown || !Parent.RefuelableComp().HasFuel)
 			{
 				return BackupPowerStatus.Error;
 			}
@@ -47,14 +47,19 @@ public class Building_BackupPowerAttachment : Building
 		}
 	}
 
+	/// <summary>
+	/// Is null for first tick after map load.
+	/// </summary>
+	public Building? Parent { get; private set; }
+
 	#region These are marked as null-forgiving because they are initialized in SpawnSetup()
 
 	private Command_BatteryRange CommandBatteryRange { get; set; } = null!;
 	private Command_Toggle CommandRunOnBatteriesOnly { get; set; } = null!;
 	private Command_Toggle CommandEnabled { get; set; } = null!;
+	private Command_Toggle CommandFlickOnOff { get; set; } = null!;
 	private Command_Action CommandForceFlickOff { get; set; } = null!;
 	private Command_Action CommandForceFlickOn { get; set; } = null!;
-	public Building Parent { get; private set; } = null!;
 
 	#endregion
 
@@ -97,6 +102,7 @@ public class Building_BackupPowerAttachment : Building
 		yield return CommandBatteryRange;
 		yield return CommandRunOnBatteriesOnly;
 		yield return CommandEnabled;
+		yield return CommandFlickOnOff;
 
 		if (DebugSettings.ShowDevGizmos)
 		{
@@ -160,6 +166,15 @@ public class Building_BackupPowerAttachment : Building
 			defaultDesc = I18n.BatteryBackupEnabledDesc,
 			isActive = () => Enabled,
 			toggleAction = () => Enabled = !Enabled
+		};
+
+		CommandFlickOnOff = new Command_Toggle
+		{
+			icon = Resources.PowerTexture,
+			defaultLabel = I18n.CommandFlickOnOffLabel,
+			defaultDesc = I18n.CommandFlickOnOffDesc,
+			isActive = () => Flickable.SwitchIsOn,
+			toggleAction = () => Flickable.Force(!Flickable.SwitchIsOn)
 		};
 
 		if (!respawningAfterLoad)

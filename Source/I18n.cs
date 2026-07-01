@@ -33,6 +33,9 @@ public static class I18n
 	public static readonly string BatteryBackupEnabledLabel = Translate("BatteryBackupEnabled.Label");
 	public static readonly string BatteryBackupEnabledDesc = Translate("BatteryBackupEnabled.Desc");
 
+	public static readonly string CommandFlickOnOffLabel = Translate("CommandFlickOnOff.Label");
+	public static readonly string CommandFlickOnOffDesc = Translate("CommandFlickOnOff.Desc");
+
 
 	public static string AttachmentDestroyedBecauseParentGone(string label)
 	{
