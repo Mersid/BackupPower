@@ -54,7 +54,7 @@ public class Building_BackupPowerAttachment : Building
 
 	#region These are marked as null-forgiving because they are initialized in SpawnSetup()
 
-	private Command_BatteryRange CommandBatteryRange { get; set; } = null!;
+	private Gizmo_BatteryRange BatteryRangeGizmo { get; set; } = null!;
 	private Command_Toggle CommandRunOnBatteriesOnly { get; set; } = null!;
 	private Command_Toggle CommandEnabled { get; set; } = null!;
 	private Command_Toggle CommandFlickOnOff { get; set; } = null!;
@@ -99,7 +99,7 @@ public class Building_BackupPowerAttachment : Building
 
 	public override IEnumerable<Gizmo> GetGizmos()
 	{
-		yield return CommandBatteryRange;
+		yield return BatteryRangeGizmo;
 		yield return CommandRunOnBatteriesOnly;
 		yield return CommandEnabled;
 		yield return CommandFlickOnOff;
@@ -134,7 +134,7 @@ public class Building_BackupPowerAttachment : Building
 	public override void SpawnSetup(Map map, bool respawningAfterLoad)
 	{
 		base.SpawnSetup(map, respawningAfterLoad);
-		CommandBatteryRange = new Command_BatteryRange(this);
+		BatteryRangeGizmo = new Gizmo_BatteryRange(this);
 		CommandRunOnBatteriesOnly = new Command_Toggle
 		{
 			icon = DefDatabase<ThingDef>.GetNamed("Battery").uiIcon,
