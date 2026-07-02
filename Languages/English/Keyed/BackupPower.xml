@@ -26,7 +26,7 @@
     <Fluffy.BackupPower.CurrentStorage>Power stored: {0}</Fluffy.BackupPower.CurrentStorage>
     <Fluffy.BackupPower.TurnsOnBelow>Turns on below: {0}</Fluffy.BackupPower.TurnsOnBelow>
     <Fluffy.BackupPower.TurnsOffAbove>Turns off above: {0}</Fluffy.BackupPower.TurnsOffAbove>
-    <Fluffy.BackupPower.CommandLabel>Power Control</Fluffy.BackupPower.CommandLabel>
+    <Fluffy.BackupPower.CommandLabel>Power control</Fluffy.BackupPower.CommandLabel>
 
     <Fluffy.BackupPower.CopyTo>Copy settings to:</Fluffy.BackupPower.CopyTo>
     <Fluffy.BackupPower.CopyTo.Room>Room</Fluffy.BackupPower.CopyTo.Room>

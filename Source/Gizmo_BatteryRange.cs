@@ -20,6 +20,8 @@ public class Gizmo_BatteryRange : Gizmo_RangeSlider
 	private static bool _draggingMin;
 	private static bool _draggingMax;
 
+	private readonly List<Building_BackupPowerAttachment> _merged = new();
+
 	private Building_BackupPowerAttachment Parent { get; }
 
 	public Gizmo_BatteryRange(Building_BackupPowerAttachment parent)
@@ -36,7 +38,14 @@ public class Gizmo_BatteryRange : Gizmo_RangeSlider
 	protected override FloatRange Target
 	{
 		get => Parent.BatteryRange;
-		set => Parent.BatteryRange = value;
+		set
+		{
+			Parent.BatteryRange = value;
+			foreach (Building_BackupPowerAttachment other in _merged)
+			{
+				other.BatteryRange = value;
+			}
+		}
 	}
 
 	protected override float ValuePercent => Parent.PowerNet?.StorageLevel() ?? 0f;
@@ -64,6 +73,21 @@ public class Gizmo_BatteryRange : Gizmo_RangeSlider
 	// Green = "turns on below" threshold, red = "turns off above" threshold; matches the legacy semantics.
 	protected override Color MinMarkerColor => Resources.Greenish;
 	protected override Color MaxMarkerColor => Resources.Reddish;
+
+	protected override int Increments => 100;
+
+	public override bool GroupsWith(Gizmo other)
+	{
+		return other is Gizmo_BatteryRange;
+	}
+
+	public override void MergeWith(Gizmo other)
+	{
+		if (other is Gizmo_BatteryRange otherRange)
+		{
+			_merged.Add(otherRange.Parent);
+		}
+	}
 
 	private void CopyTo(IEnumerable<Building_BackupPowerAttachment>? brokers)
 	{

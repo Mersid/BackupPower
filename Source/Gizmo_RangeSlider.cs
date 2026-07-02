@@ -224,7 +224,16 @@ public abstract class Gizmo_RangeSlider : Gizmo
 			UIHighlighter.HighlightOpportunity(outer, HighlightTag);
 		}
 
-		return new GizmoResult(GizmoState.Clear);
+		// Detect right-click so the grid drawer opens our RightClickFloatMenuOptions.
+		if (Event.current.type == EventType.MouseDown && Event.current.button == 1
+		    && Mouse.IsOver(outer) && _rightClickOptions.Count > 0)
+		{
+			return new GizmoResult(GizmoState.OpenedFloatMenu, Event.current);
+		}
+
+		return Mouse.IsOver(outer)
+			? new GizmoResult(GizmoState.Mouseover)
+			: new GizmoResult(GizmoState.Clear);
 	}
 
 	private void DrawBar(Rect barRect, bool mouseOver)
