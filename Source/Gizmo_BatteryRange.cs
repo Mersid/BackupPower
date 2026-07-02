@@ -39,14 +39,7 @@ public class Gizmo_BatteryRange : Gizmo_RangeSlider
 		set => Parent.BatteryRange = value;
 	}
 
-	protected override FloatRange ValueRange
-	{
-		get
-		{
-			float storage = Parent.PowerNet?.StorageLevel() ?? 0f;
-			return new FloatRange(storage, storage);
-		}
-	}
+	protected override float ValuePercent => Parent.PowerNet?.StorageLevel() ?? 0f;
 
 	protected override string Title => I18n.CommandLabel;
 
@@ -68,9 +61,9 @@ public class Gizmo_BatteryRange : Gizmo_RangeSlider
 			Parent.BatteryRange.max, Parent.PowerNet.StorageLevel());
 	}
 
-	// Green = "turns on" threshold, red = "turns off" threshold; matches the legacy semantics.
-	protected override Color MinBarColor => Resources.Greenish;
-	protected override Color MaxBarColor => Resources.Reddish;
+	// Green = "turns on below" threshold, red = "turns off above" threshold; matches the legacy semantics.
+	protected override Color MinMarkerColor => Resources.Greenish;
+	protected override Color MaxMarkerColor => Resources.Reddish;
 
 	private void CopyTo(IEnumerable<Building_BackupPowerAttachment>? brokers)
 	{

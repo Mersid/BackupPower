@@ -6,15 +6,16 @@ using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 
 namespace BackupPower;
 
 /// <summary>
-///     A general-purpose gizmo that exposes a <see cref="FloatRange" /> through two stacked,
-///     independently draggable bars - one for the lower bound and one for the upper bound.
-///     Mirrors <c>Verse.Gizmo_Slider</c> in spirit and rendering, but for a range instead of a
-///     single value. Not hard-wired to any domain: subclasses provide the bounds, the current
-///     values to display, labels and drag state.
+///     A general-purpose gizmo that exposes a <see cref="FloatRange" /> through two independently
+///     draggable target markers on a single fillable bar - the lower bound (min) and the upper
+///     bound (max). Mirrors <c>Verse.Gizmo_Slider</c> / <c>Gizmo_SetFuelLevel</c> in look and feel,
+///     but with two targets instead of one. Not hard-wired to any domain: subclasses provide the
+///     bounds, the current value to fill to, labels and drag state.
 /// </summary>
 /// <remarks>
 ///     <para>
@@ -31,10 +32,10 @@ namespace BackupPower;
 ///         implement collective behaviour.
 ///     </para>
 /// </remarks>
+[StaticConstructorOnStartup]
 public abstract class Gizmo_RangeSlider : Gizmo
 {
 	private const float Spacing = 8f;
-	private const float BarSpacing = 4f;
 
 	private static readonly Texture2D BarTex =
 		SolidColorMaterials.NewSolidColorTexture(new Color(0.34f, 0.42f, 0.43f));
@@ -48,12 +49,12 @@ public abstract class Gizmo_RangeSlider : Gizmo
 	private static readonly Texture2D DragBarTex =
 		SolidColorMaterials.NewSolidColorTexture(new Color(0.74f, 0.97f, 0.8f));
 
-	private Texture2D _minBarTex = null!;
-	private Texture2D _minBarHighlightTex = null!;
-	private Texture2D _minBarDragTex = null!;
-	private Texture2D _maxBarTex = null!;
-	private Texture2D _maxBarHighlightTex = null!;
-	private Texture2D _maxBarDragTex = null!;
+	private Texture2D _barTex = null!;
+	private Texture2D _barHighlightTex = null!;
+	private Texture2D _minDragTex = null!;
+	private Texture2D _maxDragTex = null!;
+	private Texture2D _bandTex = null!;
+	private bool _drawBand;
 
 	private float _targetMinPct;
 	private float _targetMaxPct;
@@ -61,11 +62,7 @@ public abstract class Gizmo_RangeSlider : Gizmo
 
 	protected virtual float Width => 160f;
 
-	/// <summary>
-	///     Total drawn height. The vanilla gizmo grid reserves 75f + 14f (spacing) per row, so the
-	///     default of 89f fits two usable bars without spilling into the next row's content.
-	/// </summary>
-	protected virtual float DrawHeight => 89f;
+	protected virtual float DrawHeight => 75f;
 
 	public sealed override float GetWidth(float maxWidth) => Width;
 
@@ -74,11 +71,8 @@ public abstract class Gizmo_RangeSlider : Gizmo
 	/// <summary>The editable bounds, expressed in <see cref="DragRange" /> space.</summary>
 	protected abstract FloatRange Target { get; set; }
 
-	/// <summary>
-	///     The values currently displayed as the filled portion of each bar, in
-	///     <see cref="DragRange" /> space. <c>min</c> drives the lower bar, <c>max</c> the upper.
-	/// </summary>
-	protected abstract FloatRange ValueRange { get; }
+	/// <summary>The current value to fill the bar to, in <see cref="DragRange" /> space.</summary>
+	protected abstract float ValuePercent { get; }
 
 	protected abstract string Title { get; }
 
@@ -94,26 +88,24 @@ public abstract class Gizmo_RangeSlider : Gizmo
 
 	protected virtual int Increments => 20;
 
-	/// <summary>When true, dragging the lower bound above the upper (or vice versa) pushes the other bound along.</summary>
+	/// <summary>When true, dragging a bound past the other pushes the other along, keeping min &lt;= max.</summary>
 	protected virtual bool EnforceOrdered => true;
 
 	protected virtual string HighlightTag => null;
 
-	protected virtual IEnumerable<float>? BarThresholds => null;
-
-	protected virtual string MinLabel => Target.min.ToStringPercent("0");
-
-	protected virtual string MaxLabel => Target.max.ToStringPercent("0");
+	protected virtual string BarLabel =>
+		$"{Target.min.ToStringPercent("0")} - {Target.max.ToStringPercent("0")}";
 
 	// Colours: returning `new Color()` (the default struct) is a sentinel meaning
 	// "use the shared static texture". Any other value allocates a texture once per gizmo.
 	// This mirrors Gizmo_Slider and avoids per-frame allocations for the common, uncustomised case.
-	protected virtual Color MinBarColor => new Color();
-	protected virtual Color MaxBarColor => new Color();
-	protected virtual Color MinBarHighlightColor => new Color();
-	protected virtual Color MaxBarHighlightColor => new Color();
-	protected virtual Color MinBarDragColor => new Color();
-	protected virtual Color MaxBarDragColor => new Color();
+	protected virtual Color BarColor => new Color();
+	protected virtual Color BarHighlightColor => new Color();
+	protected virtual Color MinMarkerColor => new Color();
+	protected virtual Color MaxMarkerColor => new Color();
+
+	/// <summary>Colour of the band drawn between the two markers. Default (<c>new Color()</c>) draws no band.</summary>
+	protected virtual Color BandColor => new Color();
 
 	private readonly List<FloatMenuOption> _rightClickOptions = new();
 
@@ -164,13 +156,24 @@ public abstract class Gizmo_RangeSlider : Gizmo
 		}
 
 		_initialized = true;
-		_minBarTex = ResolveTex(MinBarColor, BarTex);
-		_minBarHighlightTex = ResolveTex(MinBarHighlightColor, BarHighlightTex);
-		_minBarDragTex = ResolveTex(MinBarDragColor, DragBarTex);
-		_maxBarTex = ResolveTex(MaxBarColor, BarTex);
-		_maxBarHighlightTex = ResolveTex(MaxBarHighlightColor, BarHighlightTex);
-		_maxBarDragTex = ResolveTex(MaxBarDragColor, DragBarTex);
+		_barTex = ResolveTex(BarColor, BarTex);
+		_barHighlightTex = ResolveTex(BarHighlightColor, BarHighlightTex);
+		_minDragTex = ResolveTex(MinMarkerColor, DragBarTex);
+		_maxDragTex = ResolveTex(MaxMarkerColor, DragBarTex);
+		_bandTex = ResolveTex(BandColor, BarHighlightTex);
+		_drawBand = BandColor != new Color();
+
+		if (!_loggedScaling)
+		{
+			_loggedScaling = true;
+			Log.Message(
+				"[BackupPower] Gizmo_RangeSlider text scaling: header=GameFont.Small, " +
+				"barLabel was GameFont.Tiny -> now GameFont.Small (matches Gizmo_Slider). " +
+				"Revert bar label to GameFont.Tiny in DrawBar() if it doesn't pan out.");
+		}
 	}
+
+	private static bool _loggedScaling;
 
 	private static Texture2D ResolveTex(Color color, Texture2D fallback)
 	{
@@ -185,7 +188,7 @@ public abstract class Gizmo_RangeSlider : Gizmo
 		}
 
 		// Keep the drag markers in sync with the source when not actively dragging, so external
-		// changes to Target are reflected on the bars.
+		// changes to Target are reflected on the bar.
 		if (!DraggingMin)
 		{
 			_targetMinPct = Mathf.Clamp(Target.min, DragRange.min, DragRange.max);
@@ -205,14 +208,9 @@ public abstract class Gizmo_RangeSlider : Gizmo
 		Rect headerRect = inner with { height = Text.LineHeight };
 		DrawHeader(headerRect, ref mouseOverElement);
 
-		float barsTop = headerRect.yMax + Spacing;
-		float barsHeight = inner.yMax - barsTop;
-		float barHeight = (barsHeight - BarSpacing) / 2f;
-		Rect minRect = new Rect(inner.x, barsTop, inner.width, barHeight);
-		Rect maxRect = new Rect(inner.x, minRect.yMax + BarSpacing, inner.width, barHeight);
-
-		DrawBar(minRect, isMin: true);
-		DrawBar(maxRect, isMin: false);
+		Rect barRect = inner;
+		barRect.yMin = headerRect.yMax + Spacing;
+		DrawBar(barRect, Mouse.IsOver(barRect));
 
 		if (Mouse.IsOver(outer) && !mouseOverElement)
 		{
@@ -229,63 +227,166 @@ public abstract class Gizmo_RangeSlider : Gizmo
 		return new GizmoResult(GizmoState.Clear);
 	}
 
-	private void DrawBar(Rect barRect, bool isMin)
+	private void DrawBar(Rect barRect, bool mouseOver)
 	{
-		Texture2D barTex = isMin ? _minBarTex : _maxBarTex;
-		Texture2D highlightTex = isMin ? _minBarHighlightTex : _maxBarHighlightTex;
-		Texture2D dragTex = isMin ? _minBarDragTex : _maxBarDragTex;
-		float valuePct = isMin ? ValueRange.min : ValueRange.max;
-		bool dragging = isMin ? DraggingMin : DraggingMax;
-		float targetPct = isMin ? _targetMinPct : _targetMaxPct;
+		float fillNorm = Mathf.Clamp01(Normalize(ValuePercent));
+		Texture2D fillTex = mouseOver ? _barHighlightTex : _barTex;
 
+		Widgets.FillableBar(barRect, fillNorm, fillTex, EmptyBarTex, true);
+
+		float minNorm = Normalize(_targetMinPct);
+		float maxNorm = Normalize(_targetMaxPct);
+
+		if (_drawBand)
+		{
+			DrawBand(barRect, minNorm, maxNorm);
+		}
+
+		DrawTargetMarker(barRect, minNorm, _minDragTex);
+		DrawTargetMarker(barRect, maxNorm, _maxDragTex);
+
+		HandleDrag(barRect);
+
+		// Label on top of the bar, matching Gizmo_Slider.
+		Text.Font = GameFont.Small;
+		Text.Anchor = TextAnchor.MiddleCenter;
+		Widgets.Label(barRect, BarLabel);
+		Text.Anchor = TextAnchor.UpperLeft;
+		Text.Font = GameFont.Small;
+	}
+
+	private float Normalize(float value)
+	{
+		return Mathf.InverseLerp(DragRange.min, DragRange.max, value);
+	}
+
+	private static void DrawTargetMarker(Rect barRect, float normalizedPct, Texture2D tex)
+	{
+		float x = Mathf.Round((barRect.width - 8f) * normalizedPct);
+		Rect line = new Rect(barRect.x + 3f + x, barRect.y, 2f, barRect.height);
+		GUI.DrawTexture(line, tex);
+		Rect nub = new Rect(barRect.x + 2f + x, barRect.y - 3f, 4f, 5f);
+		GUI.DrawTexture(nub, tex);
+		GUI.DrawTexture(new Rect(nub.x, barRect.yMax - 2f, nub.width, nub.height), tex);
+	}
+
+	private void DrawBand(Rect barRect, float minNorm, float maxNorm)
+	{
+		float xMin = barRect.x + 3f + (barRect.width - 8f) * minNorm;
+		float xMax = barRect.x + 3f + (barRect.width - 8f) * maxNorm;
+		Rect band = new Rect(xMin, barRect.y, xMax - xMin, barRect.height);
+		GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, 0.35f);
+		GUI.DrawTexture(band, _bandTex);
+		GUI.color = Color.white;
+	}
+
+	private void HandleDrag(Rect barRect)
+	{
 		if (!IsDraggable)
 		{
-			Widgets.FillableBar(barRect, Mathf.Min(valuePct, 1f), barTex, EmptyBarTex, true);
+			return;
+		}
+
+		Event ev = Event.current;
+		bool overBar = Mouse.IsOver(barRect);
+		float mousePct = SnapToIncrements(MouseToPct(barRect, ev.mousePosition.x));
+
+		// Begin a drag on left-press over the bar: pick the nearer marker.
+		if (ev.type == EventType.MouseDown && ev.button == 0 && overBar
+		    && !DraggingMin && !DraggingMax)
+		{
+			// When the two markers are (near-)coincident, pick by which side of the shared
+			// position the cursor is on: left of it grabs min, right of it grabs max. This
+			// lets the player pull them apart in either direction even when min == max.
+			bool coincident = Mathf.Abs(_targetMinPct - _targetMaxPct) < 0.001f;
+			bool pickMin = coincident
+				? mousePct <= _targetMinPct
+				: Mathf.Abs(mousePct - _targetMinPct) <= Mathf.Abs(mousePct - _targetMaxPct);
+			if (pickMin)
+			{
+				DraggingMin = true;
+			}
+			else
+			{
+				DraggingMax = true;
+			}
+
+			ApplyDraggedTarget(mousePct, pickMin);
+			SoundDefOf.DragSlider.PlayOneShotOnCamera();
+			ev.Use();
+		}
+
+		// Continue dragging.
+		if ((DraggingMin || DraggingMax) && UnityGUIBugsFixer.MouseDrag())
+		{
+			bool min = DraggingMin;
+			float prev = min ? _targetMinPct : _targetMaxPct;
+			if (Mathf.Abs(mousePct - prev) > Mathf.Epsilon)
+			{
+				ApplyDraggedTarget(mousePct, min);
+				SoundDefOf.DragSlider.PlayOneShotOnCamera();
+			}
+
+			if (ev.type == EventType.MouseDrag)
+			{
+				ev.Use();
+			}
+		}
+
+		// End dragging.
+		if ((DraggingMin || DraggingMax) && ev.type == EventType.MouseUp && ev.button == 0)
+		{
+			DraggingMin = false;
+			DraggingMax = false;
+			ev.Use();
+		}
+	}
+
+	private float MouseToPct(Rect barRect, float mouseX)
+	{
+		float span = DragRange.max - DragRange.min;
+		float pct = DragRange.min + (mouseX - barRect.x) / barRect.width * span;
+		return Mathf.Clamp(pct, DragRange.min, DragRange.max);
+	}
+
+	private float SnapToIncrements(float pct)
+	{
+		if (Increments <= 0)
+		{
+			return pct;
+		}
+
+		float span = DragRange.max - DragRange.min;
+		if (span <= 0f)
+		{
+			return pct;
+		}
+
+		float step = span / Increments;
+		return Mathf.Round((pct - DragRange.min) / step) * step + DragRange.min;
+	}
+
+	private void ApplyDraggedTarget(float pct, bool min)
+	{
+		pct = Mathf.Clamp(pct, DragRange.min, DragRange.max);
+		if (min)
+		{
+			_targetMinPct = pct;
+			if (EnforceOrdered && _targetMinPct > _targetMaxPct)
+			{
+				_targetMaxPct = _targetMinPct;
+			}
 		}
 		else
 		{
-			Widgets.DraggableBar(barRect, barTex, highlightTex, EmptyBarTex, dragTex,
-				ref dragging, Mathf.Min(valuePct, 1f), ref targetPct,
-				BarThresholds, Increments, DragRange.min, DragRange.max);
-
-			if (isMin)
+			_targetMaxPct = pct;
+			if (EnforceOrdered && _targetMaxPct < _targetMinPct)
 			{
-				DraggingMin = dragging;
+				_targetMinPct = _targetMaxPct;
 			}
-			else
-			{
-				DraggingMax = dragging;
-			}
-
-			targetPct = Mathf.Clamp(targetPct, DragRange.min, DragRange.max);
-
-			// Keep the bounds ordered, then write back so the source of truth stays in sync.
-			if (isMin)
-			{
-				_targetMinPct = targetPct;
-				if (EnforceOrdered && _targetMinPct > _targetMaxPct)
-				{
-					_targetMaxPct = _targetMinPct;
-				}
-			}
-			else
-			{
-				_targetMaxPct = targetPct;
-				if (EnforceOrdered && _targetMaxPct < _targetMinPct)
-				{
-					_targetMinPct = _targetMaxPct;
-				}
-			}
-
-			Target = new FloatRange(_targetMinPct, _targetMaxPct);
 		}
 
-		// Label on top of the bar, matching Gizmo_Slider.
-		Text.Font = GameFont.Tiny;
-		Text.Anchor = TextAnchor.MiddleCenter;
-		Widgets.Label(barRect, isMin ? MinLabel : MaxLabel);
-		Text.Anchor = TextAnchor.UpperLeft;
-		Text.Font = GameFont.Small;
+		Target = new FloatRange(_targetMinPct, _targetMaxPct);
 	}
 
 	protected virtual void DrawHeader(Rect headerRect, ref bool mouseOverElement)

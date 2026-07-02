@@ -33,12 +33,20 @@ public class Building_BackupPowerAttachment : Building
 	{
 		get
 		{
-			if (Parent is null || Parent.BreakdownableComp().BrokenDown || !Parent.RefuelableComp().HasFuel)
+			if (Parent is null)
 			{
 				return BackupPowerStatus.Error;
 			}
 
-			if (PowerPlant.PowerOn)
+			// Null-safe: a generator without a breakdownable/refuelable comp simply isn't
+			// broken down / out of fuel, rather than NRE'ing on the missing comp.
+			if (Parent.BreakdownableComp()?.BrokenDown == true
+			    || Parent.RefuelableComp()?.HasFuel == false)
+			{
+				return BackupPowerStatus.Error;
+			}
+
+			if (PowerPlant?.PowerOn == true)
 			{
 				return BackupPowerStatus.Running;
 			}
