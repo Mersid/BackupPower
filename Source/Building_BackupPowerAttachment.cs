@@ -50,8 +50,8 @@ public class Building_BackupPowerAttachment : Building
     private int LastOnTick { get; set; }
 
     private Color PrevColor { get; set; }
-    private CompFlickable Flickable => Parent.FlickableComp();
-    private CompPowerPlant PowerPlant => Parent.PowerPlantComp();
+    private CompFlickable? Flickable => Parent?.FlickableComp();
+    private CompPowerPlant? PowerPlant => Parent?.PowerPlantComp();
 
 
     public bool CanTurnOff() => LastOnTick + BackupPower.Settings.MinimumOnTime < Find.TickManager.TicksGame;
