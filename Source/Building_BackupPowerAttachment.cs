@@ -15,19 +15,12 @@ namespace BackupPower;
 public class Building_BackupPowerAttachment : Building
 {
 	public FloatRange BatteryRange = FloatRange.One;
-	public bool RunOnBatteriesOnly = true;
 	public bool Enabled = true;
-
-	private int LastOnTick { get; set; }
-
-	private Color PrevColor { get; set; }
+	public bool RunOnBatteriesOnly = true;
 	public override Color DrawColor => Resources.StatusColor(Status);
-	private CompFlickable Flickable => Parent.FlickableComp();
-
 
 
 	public PowerNet? PowerNet => Parent.PowerComp?.PowerNet;
-	private CompPowerPlant PowerPlant => Parent.PowerPlantComp();
 
 	public BackupPowerStatus Status
 	{
@@ -60,16 +53,11 @@ public class Building_BackupPowerAttachment : Building
 	/// </summary>
 	public Building? Parent { get; private set; }
 
-	#region These are marked as null-forgiving because they are initialized in SpawnSetup()
+	private int LastOnTick { get; set; }
 
-	private Gizmo_BatteryRange BatteryRangeGizmo { get; set; } = null!;
-	private Command_Toggle CommandRunOnBatteriesOnly { get; set; } = null!;
-	private Command_Toggle CommandEnabled { get; set; } = null!;
-	private Command_Toggle CommandFlickOnOff { get; set; } = null!;
-	private Command_Action CommandForceFlickOff { get; set; } = null!;
-	private Command_Action CommandForceFlickOn { get; set; } = null!;
-
-	#endregion
+	private Color PrevColor { get; set; }
+	private CompFlickable Flickable => Parent.FlickableComp();
+	private CompPowerPlant PowerPlant => Parent.PowerPlantComp();
 
 
 	public bool CanTurnOff()
@@ -191,6 +179,17 @@ public class Building_BackupPowerAttachment : Building
 		}
 	}
 
+	public void TurnOff()
+	{
+		Flickable.Force(false);
+	}
+
+	public void TurnOn()
+	{
+		LastOnTick = Find.TickManager.TicksGame;
+		Flickable.Force(true);
+	}
+
 	protected override void Tick()
 	{
 		if (this.IsHashIntervalTick(60) && PrevColor != DrawColor)
@@ -209,17 +208,6 @@ public class Building_BackupPowerAttachment : Building
 		}
 	}
 
-	public void TurnOff()
-	{
-		Flickable.Force(false);
-	}
-
-	public void TurnOn()
-	{
-		LastOnTick = Find.TickManager.TicksGame;
-		Flickable.Force(true);
-	}
-
 	private bool TryAttach(Map map, bool reAttach = false)
 	{
 		Parent = Position.GetEdifice(map);
@@ -231,4 +219,15 @@ public class Building_BackupPowerAttachment : Building
 
 		return success;
 	}
+
+	#region These are marked as null-forgiving because they are initialized in SpawnSetup()
+
+	private Gizmo_BatteryRange BatteryRangeGizmo { get; set; } = null!;
+	private Command_Toggle CommandRunOnBatteriesOnly { get; set; } = null!;
+	private Command_Toggle CommandEnabled { get; set; } = null!;
+	private Command_Toggle CommandFlickOnOff { get; set; } = null!;
+	private Command_Action CommandForceFlickOff { get; set; } = null!;
+	private Command_Action CommandForceFlickOn { get; set; } = null!;
+
+	#endregion
 }

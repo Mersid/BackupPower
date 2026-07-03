@@ -49,24 +49,55 @@ public abstract class Gizmo_RangeSlider : Gizmo
 	private static readonly Texture2D DragBarTex =
 		SolidColorMaterials.NewSolidColorTexture(new Color(0.74f, 0.97f, 0.8f));
 
-	private Texture2D _barTex = null!;
-	private Texture2D _barHighlightTex = null!;
-	private Texture2D _minDragTex = null!;
-	private Texture2D _maxDragTex = null!;
+	private static bool _loggedScaling;
+
+	private readonly List<FloatMenuOption> _rightClickOptions = new();
 	private Texture2D _bandTex = null!;
+	private Texture2D _barHighlightTex = null!;
+
+	private Texture2D _barTex = null!;
 	private bool _drawBand;
+	private bool _initialized;
+	private Texture2D _maxDragTex = null!;
+	private Texture2D _minDragTex = null!;
+	private float _targetMaxPct;
 
 	private float _targetMinPct;
-	private float _targetMaxPct;
-	private bool _initialized;
+
+	public override float Order => -100f;
+
+	/// <summary>
+	///     Imperatively registered right-click menu options, merged into
+	///     <see cref="Gizmo.RightClickFloatMenuOptions" />. Callers can either add ready-made
+	///     <see cref="FloatMenuOption" />s directly, or use
+	///     <see cref="AddRightClickOption(string,Action)" /> for the common case.
+	/// </summary>
+	public List<FloatMenuOption> RightClickOptions => _rightClickOptions;
+
+	/// <summary>
+	///     Combines any base-provided options with those registered via
+	///     <see cref="RightClickOptions" /> / <see cref="AddRightClickOption(string,Action)" />.
+	///     Still overridable for full control if a subclass needs dynamic generation instead.
+	/// </summary>
+	public override IEnumerable<FloatMenuOption> RightClickFloatMenuOptions
+	{
+		get
+		{
+			foreach (FloatMenuOption option in base.RightClickFloatMenuOptions)
+			{
+				yield return option;
+			}
+
+			for (int i = 0; i < _rightClickOptions.Count; i++)
+			{
+				yield return _rightClickOptions[i];
+			}
+		}
+	}
 
 	protected virtual float Width => 160f;
 
 	protected virtual float DrawHeight => 75f;
-
-	public sealed override float GetWidth(float maxWidth) => Width;
-
-	public override float Order => -100f;
 
 	/// <summary>The editable bounds, expressed in <see cref="DragRange" /> space.</summary>
 	protected abstract FloatRange Target { get; set; }
@@ -79,8 +110,6 @@ public abstract class Gizmo_RangeSlider : Gizmo
 	protected abstract bool DraggingMin { get; set; }
 
 	protected abstract bool DraggingMax { get; set; }
-
-	protected abstract string GetTooltip();
 
 	protected virtual bool IsDraggable => true;
 
@@ -107,15 +136,7 @@ public abstract class Gizmo_RangeSlider : Gizmo
 	/// <summary>Colour of the band drawn between the two markers. Default (<c>new Color()</c>) draws no band.</summary>
 	protected virtual Color BandColor => new Color();
 
-	private readonly List<FloatMenuOption> _rightClickOptions = new();
-
-	/// <summary>
-	///     Imperatively registered right-click menu options, merged into
-	///     <see cref="Gizmo.RightClickFloatMenuOptions" />. Callers can either add ready-made
-	///     <see cref="FloatMenuOption" />s directly, or use
-	///     <see cref="AddRightClickOption(string,Action)" /> for the common case.
-	/// </summary>
-	public List<FloatMenuOption> RightClickOptions => _rightClickOptions;
+	public sealed override float GetWidth(float maxWidth) => Width;
 
 	/// <summary>
 	///     Register a right-click menu entry that runs <paramref name="action" /> when clicked.
@@ -125,59 +146,6 @@ public abstract class Gizmo_RangeSlider : Gizmo
 	public void AddRightClickOption(string label, Action action)
 	{
 		_rightClickOptions.Add(new FloatMenuOption(label, action));
-	}
-
-	/// <summary>
-	///     Combines any base-provided options with those registered via
-	///     <see cref="RightClickOptions" /> / <see cref="AddRightClickOption(string,Action)" />.
-	///     Still overridable for full control if a subclass needs dynamic generation instead.
-	/// </summary>
-	public override IEnumerable<FloatMenuOption> RightClickFloatMenuOptions
-	{
-		get
-		{
-			foreach (FloatMenuOption option in base.RightClickFloatMenuOptions)
-			{
-				yield return option;
-			}
-
-			for (int i = 0; i < _rightClickOptions.Count; i++)
-			{
-				yield return _rightClickOptions[i];
-			}
-		}
-	}
-
-	private void Initialize()
-	{
-		if (_initialized)
-		{
-			return;
-		}
-
-		_initialized = true;
-		_barTex = ResolveTex(BarColor, BarTex);
-		_barHighlightTex = ResolveTex(BarHighlightColor, BarHighlightTex);
-		_minDragTex = ResolveTex(MinMarkerColor, DragBarTex);
-		_maxDragTex = ResolveTex(MaxMarkerColor, DragBarTex);
-		_bandTex = ResolveTex(BandColor, BarHighlightTex);
-		_drawBand = BandColor != new Color();
-
-		if (!_loggedScaling)
-		{
-			_loggedScaling = true;
-			Log.Message(
-				"[BackupPower] Gizmo_RangeSlider text scaling: header=GameFont.Small, " +
-				"barLabel was GameFont.Tiny -> now GameFont.Small (matches Gizmo_Slider). " +
-				"Revert bar label to GameFont.Tiny in DrawBar() if it doesn't pan out.");
-		}
-	}
-
-	private static bool _loggedScaling;
-
-	private static Texture2D ResolveTex(Color color, Texture2D fallback)
-	{
-		return color == new Color() ? fallback : SolidColorMaterials.NewSolidColorTexture(color)!;
 	}
 
 	public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
@@ -234,6 +202,44 @@ public abstract class Gizmo_RangeSlider : Gizmo
 		return Mouse.IsOver(outer)
 			? new GizmoResult(GizmoState.Mouseover)
 			: new GizmoResult(GizmoState.Clear);
+	}
+
+	protected abstract string GetTooltip();
+
+	protected virtual void DrawHeader(Rect headerRect, ref bool mouseOverElement)
+	{
+		string label = Title.Truncate(headerRect.width);
+		Widgets.Label(headerRect, label);
+	}
+
+	private void Initialize()
+	{
+		if (_initialized)
+		{
+			return;
+		}
+
+		_initialized = true;
+		_barTex = ResolveTex(BarColor, BarTex);
+		_barHighlightTex = ResolveTex(BarHighlightColor, BarHighlightTex);
+		_minDragTex = ResolveTex(MinMarkerColor, DragBarTex);
+		_maxDragTex = ResolveTex(MaxMarkerColor, DragBarTex);
+		_bandTex = ResolveTex(BandColor, BarHighlightTex);
+		_drawBand = BandColor != new Color();
+
+		if (!_loggedScaling)
+		{
+			_loggedScaling = true;
+			Log.Message(
+				"[BackupPower] Gizmo_RangeSlider text scaling: header=GameFont.Small, " +
+				"barLabel was GameFont.Tiny -> now GameFont.Small (matches Gizmo_Slider). " +
+				"Revert bar label to GameFont.Tiny in DrawBar() if it doesn't pan out.");
+		}
+	}
+
+	private static Texture2D ResolveTex(Color color, Texture2D fallback)
+	{
+		return color == new Color() ? fallback : SolidColorMaterials.NewSolidColorTexture(color)!;
 	}
 
 	private void DrawBar(Rect barRect, bool mouseOver)
@@ -396,11 +402,5 @@ public abstract class Gizmo_RangeSlider : Gizmo
 		}
 
 		Target = new FloatRange(_targetMinPct, _targetMaxPct);
-	}
-
-	protected virtual void DrawHeader(Rect headerRect, ref bool mouseOverElement)
-	{
-		string label = Title.Truncate(headerRect.width);
-		Widgets.Label(headerRect, label);
 	}
 }
