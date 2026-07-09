@@ -71,7 +71,10 @@ public abstract class Gizmo_RangeSlider : Gizmo
     /// <see cref="FloatMenuOption" />s directly, or use
     /// <see cref="AddRightClickOption(string,Action)" /> for the common case.
     /// </summary>
-    public List<FloatMenuOption> RightClickOptions { get; } = new List<FloatMenuOption>();
+    public List<FloatMenuOption> RightClickOptions { get; } = [];
+
+    // Deferred: cheap, thread-safe, no text metrics. Materialized on demand in the getter.
+    private readonly List<(string label, Action action)> _deferredRightClickOptions = [];
 
     /// <summary>
     /// Combines any base-provided options with those registered via
@@ -87,6 +90,13 @@ public abstract class Gizmo_RangeSlider : Gizmo
 
             for (int i = 0; i < RightClickOptions.Count; i++)
                 yield return RightClickOptions[i];
+
+            // FloatMenuOption ctor -> Label -> CalcHeight happens HERE, on the main thread. Safe.
+            for (int i = 0; i < _deferredRightClickOptions.Count; i++)
+            {
+                var (label, action) = _deferredRightClickOptions[i];
+                yield return new FloatMenuOption(label, action);
+            }
         }
     }
 
@@ -140,7 +150,10 @@ public abstract class Gizmo_RangeSlider : Gizmo
     /// </summary>
     public void AddRightClickOption(string label, Action action)
     {
-        RightClickOptions.Add(new FloatMenuOption(label, action));
+        // Defer options so that creation occurs on main thread. When RightClickFloatMenuOptions() is called
+        // by the engine, it is on the correct thread. If we try to construct here, it will go very wrong,
+        // IMGUI will crash, and we will experience all kinds of graphics issues, if not crash outright.
+        _deferredRightClickOptions.Add((label, action)); // no GUI work at call time
     }
 
     public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
@@ -181,13 +194,16 @@ public abstract class Gizmo_RangeSlider : Gizmo
 
         // Detect right-click so the grid drawer opens our RightClickFloatMenuOptions.
         if (Event.current.type == EventType.MouseDown && Event.current.button == 1
-                                                      && Mouse.IsOver(outer) && RightClickOptions.Count > 0)
+                                                      && Mouse.IsOver(outer) && HasRightClickOptions)
             return new GizmoResult(GizmoState.OpenedFloatMenu, Event.current);
 
         return Mouse.IsOver(outer)
             ? new GizmoResult(GizmoState.Mouseover)
             : new GizmoResult(GizmoState.Clear);
     }
+
+    private bool HasRightClickOptions =>
+        RightClickOptions.Count > 0 || _deferredRightClickOptions.Count > 0;
 
     protected abstract string GetTooltip();
 
