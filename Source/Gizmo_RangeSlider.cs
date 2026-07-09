@@ -94,7 +94,7 @@ public abstract class Gizmo_RangeSlider : Gizmo
             // FloatMenuOption ctor -> Label -> CalcHeight happens HERE, on the main thread. Safe.
             for (int i = 0; i < _deferredRightClickOptions.Count; i++)
             {
-                var (label, action) = _deferredRightClickOptions[i];
+                (string label, Action action) = _deferredRightClickOptions[i];
                 yield return new FloatMenuOption(label, action);
             }
         }
@@ -139,7 +139,8 @@ public abstract class Gizmo_RangeSlider : Gizmo
     protected virtual Color MaxMarkerColor => new Color();
 
     /// <summary>
-    /// Colour of the band drawn between the two markers. Default (<c>new Color()</c>) draws no band.</summary>
+    /// Colour of the band drawn between the two markers. Default (<c>new Color()</c>) draws no band.
+    /// </summary>
     protected virtual Color BandColor => new Color();
 
     private bool HasRightClickOptions =>

@@ -18,9 +18,9 @@ public class PowerTraderInfo
 	/// The backup battery box building, if any.
 	/// </summary>
 	[CanBeNull]
-	public Building_BackupPowerAttachment Broker { get; set; }
+    public Building_BackupPowerAttachment Broker { get; set; }
 
-	public float Consumption { get; set; }
-	public float CurrentProduction { get; set; }
-	public float PotentialProduction { get; set; }
+    public float Consumption { get; set; }
+    public float CurrentProduction { get; set; }
+    public float PotentialProduction { get; set; }
 }
