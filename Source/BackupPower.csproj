@@ -12,10 +12,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <OutputPath>..\1.6\Assemblies\</OutputPath>
+        <OutputPath>..\1.6\Assemblies\</OutputPath>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <OutputPath>..\1.6\Assemblies\</OutputPath>
+        <OutputPath>..\1.6\Assemblies\</OutputPath>
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="Assembly-CSharp">

@@ -12,18 +12,17 @@ namespace BackupPower;
 // ReSharper disable once InconsistentNaming
 public class Command_BatteryRange : Command
 {
+	public override string Desc =>
+		I18n.StatusString(Parent.Status, Parent.BatteryRange.min,
+			Parent.BatteryRange.max, Parent.PowerNet.StorageLevel());
+
+	public override string Label => I18n.CommandLabel;
 	private Building_BackupPowerAttachment Parent { get; }
 
 	public Command_BatteryRange(Building_BackupPowerAttachment parent)
 	{
 		Parent = parent;
 	}
-
-	public override string Desc =>
-		I18n.StatusString(Parent.Status, Parent.BatteryRange.min,
-			Parent.BatteryRange.max, Parent.PowerNet.StorageLevel());
-
-	public override string Label => I18n.CommandLabel;
 
 	public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
 	{

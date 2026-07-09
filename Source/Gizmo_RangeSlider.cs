@@ -51,6 +51,9 @@ public abstract class Gizmo_RangeSlider : Gizmo
 
     private static bool _loggedScaling;
 
+    // Deferred: cheap, thread-safe, no text metrics. Materialized on demand in the getter.
+    private readonly List<(string label, Action action)> _deferredRightClickOptions = [];
+
     private Texture2D _bandTex = null!;
     private Texture2D _barHighlightTex = null!;
 
@@ -72,9 +75,6 @@ public abstract class Gizmo_RangeSlider : Gizmo
     /// <see cref="AddRightClickOption(string,Action)" /> for the common case.
     /// </summary>
     public List<FloatMenuOption> RightClickOptions { get; } = [];
-
-    // Deferred: cheap, thread-safe, no text metrics. Materialized on demand in the getter.
-    private readonly List<(string label, Action action)> _deferredRightClickOptions = [];
 
     /// <summary>
     /// Combines any base-provided options with those registered via
@@ -138,8 +138,12 @@ public abstract class Gizmo_RangeSlider : Gizmo
     protected virtual Color MinMarkerColor => new Color();
     protected virtual Color MaxMarkerColor => new Color();
 
-    /// <summary>Colour of the band drawn between the two markers. Default (<c>new Color()</c>) draws no band.</summary>
+    /// <summary>
+    /// Colour of the band drawn between the two markers. Default (<c>new Color()</c>) draws no band.</summary>
     protected virtual Color BandColor => new Color();
+
+    private bool HasRightClickOptions =>
+        RightClickOptions.Count > 0 || _deferredRightClickOptions.Count > 0;
 
     public sealed override float GetWidth(float maxWidth) => Width;
 
@@ -201,9 +205,6 @@ public abstract class Gizmo_RangeSlider : Gizmo
             ? new GizmoResult(GizmoState.Mouseover)
             : new GizmoResult(GizmoState.Clear);
     }
-
-    private bool HasRightClickOptions =>
-        RightClickOptions.Count > 0 || _deferredRightClickOptions.Count > 0;
 
     protected abstract string GetTooltip();
 
