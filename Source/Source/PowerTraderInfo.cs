@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using RimWorld;
+﻿using RimWorld;
 
 namespace BackupPower;
 

@@ -19,18 +19,6 @@ public class MapComponent_PowerBroker(Map map) : MapComponent(map)
         GetMapComponentFor(broker.Map)._brokers.RemoveSafe(broker);
     }
 
-    private static MapComponent_PowerBroker GetMapComponentFor(Map map)
-    {
-        MapComponent_PowerBroker? component = map.GetComponent<MapComponent_PowerBroker>();
-        if (component is not null)
-            return component;
-
-        component = new MapComponent_PowerBroker(map);
-        map.components.Add(component);
-
-        return component;
-    }
-
     public static void RegisterBroker(Building_BackupPowerAttachment broker, bool update = false)
     {
         MapComponent_PowerBroker comp = GetMapComponentFor(broker.Map);
@@ -83,7 +71,7 @@ public class MapComponent_PowerBroker(Map map) : MapComponent(map)
                 .ToList();
 
             if (backups.TryRandomElementByWeight(c => 1 / c.CurrentProduction,
-                    out PowerTraderInfo backup ) && backup.Broker is not null)
+                    out PowerTraderInfo backup) && backup.Broker is not null)
                 backup.Broker.TurnOff();
         }
 
@@ -101,5 +89,17 @@ public class MapComponent_PowerBroker(Map map) : MapComponent(map)
                     out PowerTraderInfo backup) && backup.Broker is not null)
                 backup.Broker.TurnOn();
         }
+    }
+
+    private static MapComponent_PowerBroker GetMapComponentFor(Map map)
+    {
+        MapComponent_PowerBroker? component = map.GetComponent<MapComponent_PowerBroker>();
+        if (component is not null)
+            return component;
+
+        component = new MapComponent_PowerBroker(map);
+        map.components.Add(component);
+
+        return component;
     }
 }

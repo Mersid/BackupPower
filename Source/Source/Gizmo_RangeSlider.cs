@@ -77,9 +77,7 @@ public abstract class Gizmo_RangeSlider : Gizmo
 
             // FloatMenuOption ctor -> Label -> CalcHeight happens HERE, on the main thread. Safe.
             foreach ((string label, Action action) in RightClickOptions)
-            {
                 yield return new FloatMenuOption(label, action);
-            }
         }
     }
 
