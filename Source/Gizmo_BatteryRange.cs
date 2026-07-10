@@ -12,15 +12,15 @@ namespace BackupPower;
 /// <summary>
 /// Backup Power's concrete range slider: lets the player drag the on/off battery thresholds
 /// for a <see cref="Building_BackupPowerAttachment" />. Replaces the legacy
-/// <see cref="Command_BatteryRange" /> with the vanilla-aligned <see cref="Gizmo_RangeSlider" />
+/// `Command_BatteryRange` with the vanilla-aligned <see cref="Gizmo_RangeSlider" />
 /// look and feel.
 /// </summary>
-public class Gizmo_BatteryRange : Gizmo_RangeSlider
+public sealed class Gizmo_BatteryRange : Gizmo_RangeSlider
 {
     private static bool _draggingMin;
     private static bool _draggingMax;
 
-    private readonly List<Building_BackupPowerAttachment> _merged = new List<Building_BackupPowerAttachment>();
+    private readonly List<Building_BackupPowerAttachment> _merged = [];
 
     protected override FloatRange Target
     {

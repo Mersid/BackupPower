@@ -227,15 +227,6 @@ public abstract class Gizmo_RangeSlider : Gizmo
         _maxDragTex = ResolveTex(MaxMarkerColor, DragBarTex);
         _bandTex = ResolveTex(BandColor, BarHighlightTex);
         _drawBand = BandColor != new Color();
-
-        if (!_loggedScaling)
-        {
-            _loggedScaling = true;
-            Log.Message(
-                "[BackupPower] Gizmo_RangeSlider text scaling: header=GameFont.Small, " +
-                "barLabel was GameFont.Tiny -> now GameFont.Small (matches Gizmo_Slider). " +
-                "Revert bar label to GameFont.Tiny in DrawBar() if it doesn't pan out.");
-        }
     }
 
     private static Texture2D ResolveTex(Color color, Texture2D fallback) =>

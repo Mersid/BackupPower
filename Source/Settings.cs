@@ -6,7 +6,7 @@ using Verse;
 
 namespace BackupPower;
 
-public class Settings : ModSettings
+public sealed class Settings : ModSettings
 {
     public int MinimumOnTime = GenTicks.TicksPerRealSecond * 10;
     public int UpdateInterval = GenTicks.TicksPerRealSecond;

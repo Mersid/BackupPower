@@ -13,7 +13,7 @@ namespace BackupPower;
 
 public class MapComponent_PowerBroker : MapComponent
 {
-    public readonly HashSet<Building_BackupPowerAttachment> Brokers = new HashSet<Building_BackupPowerAttachment>();
+    public readonly HashSet<Building_BackupPowerAttachment> Brokers = [];
 
     public MapComponent_PowerBroker(Map map) : base(map)
     {
@@ -62,7 +62,7 @@ public class MapComponent_PowerBroker : MapComponent
 
         foreach (IGrouping<PowerNet, Building_BackupPowerAttachment> group in Brokers.Where(b => b.PowerNet != null)
                      .GroupBy(b => b.PowerNet))
-            PowerNetUpdate(group.Key, new HashSet<Building_BackupPowerAttachment>(group));
+            PowerNetUpdate(group.Key, [..group]);
     }
 
     public float PotentialProduction(CompPowerTrader comp)

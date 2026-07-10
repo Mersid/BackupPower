@@ -12,7 +12,6 @@ public class BackupPower : Mod
 {
     public static Settings Settings { get; private set; }
 
-
     public BackupPower(ModContentPack content) : base(content)
     {
         // initialize settings

@@ -7,7 +7,7 @@ namespace BackupPower;
 /// Represents a power producer or consumer and some information about it.
 /// It beats using a ridiculously large tuple.
 /// </summary>
-public class PowerTraderInfo
+public sealed class PowerTraderInfo
 {
 	/// <summary>
 	/// The power trader itself. These are producers or consumers, but not batteries.

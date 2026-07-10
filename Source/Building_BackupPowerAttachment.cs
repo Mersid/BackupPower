@@ -20,7 +20,7 @@ public class Building_BackupPowerAttachment : Building
     public override Color DrawColor => Resources.StatusColor(Status);
 
 
-    public PowerNet? PowerNet => Parent.PowerComp?.PowerNet;
+    public PowerNet? PowerNet => Parent?.PowerComp?.PowerNet;
 
     public BackupPowerStatus Status
     {
