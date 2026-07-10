@@ -85,7 +85,9 @@ public class Building_BackupPowerAttachment : Building
         yield return BatteryRangeGizmo;
         yield return CommandRunOnBatteriesOnly;
         yield return CommandEnabled;
-        yield return CommandFlickOnOff;
+
+        if (Flickable is not null)
+            yield return CommandFlickOnOff;
 
         if (DebugSettings.ShowDevGizmos)
         {
@@ -149,15 +151,14 @@ public class Building_BackupPowerAttachment : Building
             toggleAction = () => Enabled = !Enabled
         };
 
-        if (Flickable is not null)
-            CommandFlickOnOff = new Command_Toggle
-            {
-                icon = Resources.PowerTexture,
-                defaultLabel = I18n.CommandFlickOnOffLabel,
-                defaultDesc = I18n.CommandFlickOnOffDesc,
-                isActive = () => Flickable.SwitchIsOn,
-                toggleAction = () => Flickable.Force(!Flickable.SwitchIsOn)
-            };
+        CommandFlickOnOff = new Command_Toggle
+        {
+            icon = Resources.PowerTexture,
+            defaultLabel = I18n.CommandFlickOnOffLabel,
+            defaultDesc = I18n.CommandFlickOnOffDesc,
+            isActive = () => Flickable is { SwitchIsOn: true },
+            toggleAction = () => Flickable?.Force(!Flickable.SwitchIsOn)
+        };
 
         if (!respawningAfterLoad)
             _ = TryAttach(Map);

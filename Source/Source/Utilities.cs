@@ -1,6 +1,3 @@
-// Utilities.cs
-// Copyright Karel Kroeze, 2020-2020
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
