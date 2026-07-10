@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net472</TargetFramework>
+        <TargetFramework>net48</TargetFramework>
         <AssemblyTitle>BackupPower</AssemblyTitle>
         <Product>BackupPower</Product>
         <Copyright>Copyright © 2020-2021</Copyright>
@@ -42,5 +42,11 @@
             <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="PolySharp" Version="1.16.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 </Project>

@@ -50,13 +50,15 @@ public static class Utilities
 
     public static Vector2 BottomLeft(this Rect rect) => new Vector2(rect.xMin, rect.yMax);
 
-    public static CompBreakdownable BreakdownableComp(this ThingWithComps parent)
+    public static CompBreakdownable? BreakdownableComp(this ThingWithComps parent)
     {
         if (Breakdownables.TryGetValue(parent, out CompBreakdownable breakdownable))
             return breakdownable;
 
         breakdownable = parent.GetComp<CompBreakdownable>();
         Breakdownables.Add(parent, breakdownable);
+
+        // Can, in fact, be null if GetComp returns null - it's not annotated.
         return breakdownable;
     }
 
@@ -80,13 +82,15 @@ public static class Utilities
         }
     }
 
-    public static CompFlickable FlickableComp(this ThingWithComps parent)
+    public static CompFlickable? FlickableComp(this ThingWithComps parent)
     {
         if (Flickables.TryGetValue(parent, out CompFlickable flickable))
             return flickable;
 
         flickable = parent.GetComp<CompFlickable>();
         Flickables.Add(parent, flickable);
+
+        // Can, in fact, be null if GetComp returns null - it's not annotated.
         return flickable;
     }
 
@@ -108,23 +112,25 @@ public static class Utilities
             rect.width * (1 - left - right),
             rect.height * (1 - top - bottom));
 
-    public static CompPowerPlant PowerPlantComp(this ThingWithComps parent)
+    public static CompPowerPlant? PowerPlantComp(this ThingWithComps parent)
     {
         if (Powerplants.TryGetValue(parent, out CompPowerPlant powerplant))
             return powerplant;
 
         powerplant = parent.GetComp<CompPowerPlant>();
         Powerplants.Add(parent, powerplant);
+
         return powerplant;
     }
 
-    public static CompRefuelable RefuelableComp(this ThingWithComps parent)
+    public static CompRefuelable? RefuelableComp(this ThingWithComps parent)
     {
         if (Refuelables.TryGetValue(parent, out CompRefuelable refuelable))
             return refuelable;
 
         refuelable = parent.GetComp<CompRefuelable>();
         Refuelables.Add(parent, refuelable);
+
         return refuelable;
     }
 
@@ -151,10 +157,4 @@ public static class Utilities
                 a.storedEnergyMax + b.storedEnergyMax));
         return current / max;
     }
-}
-
-[RimWorld.DefOf]
-public static class DefOf
-{
-    public static ThingDef BackupPower_Attachment;
 }

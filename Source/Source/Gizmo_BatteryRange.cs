@@ -1,6 +1,3 @@
-// Gizmo_BatteryRange.cs
-// Copyright Karel Kroeze, 2020-2025
-
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
@@ -15,6 +12,7 @@ namespace BackupPower;
 /// `Command_BatteryRange` with the vanilla-aligned <see cref="Gizmo_RangeSlider" />
 /// look and feel.
 /// </summary>
+// ReSharper disable once InconsistentNaming
 public sealed class Gizmo_BatteryRange : Gizmo_RangeSlider
 {
     private static bool _draggingMin;
@@ -82,10 +80,10 @@ public sealed class Gizmo_BatteryRange : Gizmo_RangeSlider
 
     private void CopyTo(IEnumerable<Building_BackupPowerAttachment>? brokers)
     {
-        if (brokers.EnumerableNullOrEmpty())
+        if (brokers is null)
             return;
 
-        foreach (Building_BackupPowerAttachment broker in brokers!)
+        foreach (Building_BackupPowerAttachment broker in brokers)
             Parent.CopySettingsTo(broker);
     }
 

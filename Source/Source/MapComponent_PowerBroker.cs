@@ -1,6 +1,3 @@
-// MapComponent_PowerBroker.cs
-// Copyright Karel Kroeze, 2020-2020
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,13 +8,10 @@ using Verse;
 
 namespace BackupPower;
 
-public class MapComponent_PowerBroker : MapComponent
+// ReSharper disable once InconsistentNaming
+public class MapComponent_PowerBroker(Map map) : MapComponent(map)
 {
     public readonly HashSet<Building_BackupPowerAttachment> Brokers = [];
-
-    public MapComponent_PowerBroker(Map map) : base(map)
-    {
-    }
 
     public static void DeregisterBroker([NotNull] Building_BackupPowerAttachment broker)
     {

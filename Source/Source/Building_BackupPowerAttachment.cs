@@ -1,6 +1,3 @@
-// Building_BackupPowerAttachment.cs
-// Copyright Karel Kroeze, 2020-2020
-
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
@@ -31,8 +28,7 @@ public class Building_BackupPowerAttachment : Building
 
             // Null-safe: a generator without a breakdownable/refuelable comp simply isn't
             // broken down / out of fuel, rather than NRE'ing on the missing comp.
-            if (Parent.BreakdownableComp()?.BrokenDown == true
-                || Parent.RefuelableComp()?.HasFuel == false)
+            if (Parent.BreakdownableComp()?.BrokenDown == true || Parent.RefuelableComp()?.HasFuel == false)
                 return BackupPowerStatus.Error;
 
             if (PowerPlant?.PowerOn == true)
@@ -153,14 +149,15 @@ public class Building_BackupPowerAttachment : Building
             toggleAction = () => Enabled = !Enabled
         };
 
-        CommandFlickOnOff = new Command_Toggle
-        {
-            icon = Resources.PowerTexture,
-            defaultLabel = I18n.CommandFlickOnOffLabel,
-            defaultDesc = I18n.CommandFlickOnOffDesc,
-            isActive = () => Flickable.SwitchIsOn,
-            toggleAction = () => Flickable.Force(!Flickable.SwitchIsOn)
-        };
+        if (Flickable is not null)
+            CommandFlickOnOff = new Command_Toggle
+            {
+                icon = Resources.PowerTexture,
+                defaultLabel = I18n.CommandFlickOnOffLabel,
+                defaultDesc = I18n.CommandFlickOnOffDesc,
+                isActive = () => Flickable.SwitchIsOn,
+                toggleAction = () => Flickable.Force(!Flickable.SwitchIsOn)
+            };
 
         if (!respawningAfterLoad)
             _ = TryAttach(Map);
@@ -168,13 +165,13 @@ public class Building_BackupPowerAttachment : Building
 
     public void TurnOff()
     {
-        Flickable.Force(false);
+        Flickable?.Force(false);
     }
 
     public void TurnOn()
     {
         LastOnTick = Find.TickManager.TicksGame;
-        Flickable.Force(true);
+        Flickable?.Force(true);
     }
 
     protected override void Tick()

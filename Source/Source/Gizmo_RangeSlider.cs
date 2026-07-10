@@ -1,6 +1,3 @@
-// Gizmo_RangeSlider.cs
-// Copyright Karel Kroeze, 2020-2025
-
 using System;
 using System.Collections.Generic;
 using RimWorld;
@@ -32,6 +29,7 @@ namespace BackupPower;
 ///     implement collective behaviour.
 ///     </para>
 /// </remarks>
+// ReSharper disable once InconsistentNaming
 [StaticConstructorOnStartup]
 public abstract class Gizmo_RangeSlider : Gizmo
 {
@@ -49,11 +47,6 @@ public abstract class Gizmo_RangeSlider : Gizmo
     private static readonly Texture2D DragBarTex =
         SolidColorMaterials.NewSolidColorTexture(new Color(0.74f, 0.97f, 0.8f));
 
-    private static bool _loggedScaling;
-
-    // Deferred: cheap, thread-safe, no text metrics. Materialized on demand in the getter.
-    private readonly List<(string label, Action action)> _deferredRightClickOptions = [];
-
     private Texture2D _bandTex = null!;
     private Texture2D _barHighlightTex = null!;
 
@@ -68,13 +61,7 @@ public abstract class Gizmo_RangeSlider : Gizmo
 
     public override float Order => -100f;
 
-    /// <summary>
-    /// Imperatively registered right-click menu options, merged into
-    /// <see cref="Gizmo.RightClickFloatMenuOptions" />. Callers can either add ready-made
-    /// <see cref="FloatMenuOption" />s directly, or use
-    /// <see cref="AddRightClickOption(string,Action)" /> for the common case.
-    /// </summary>
-    public List<FloatMenuOption> RightClickOptions { get; } = [];
+    public List<(string label, Action action)> RightClickOptions { get; } = [];
 
     /// <summary>
     /// Combines any base-provided options with those registered via
@@ -88,13 +75,9 @@ public abstract class Gizmo_RangeSlider : Gizmo
             foreach (FloatMenuOption option in base.RightClickFloatMenuOptions)
                 yield return option;
 
-            for (int i = 0; i < RightClickOptions.Count; i++)
-                yield return RightClickOptions[i];
-
             // FloatMenuOption ctor -> Label -> CalcHeight happens HERE, on the main thread. Safe.
-            for (int i = 0; i < _deferredRightClickOptions.Count; i++)
+            foreach ((string label, Action action) in RightClickOptions)
             {
-                (string label, Action action) = _deferredRightClickOptions[i];
                 yield return new FloatMenuOption(label, action);
             }
         }
@@ -104,10 +87,14 @@ public abstract class Gizmo_RangeSlider : Gizmo
 
     protected virtual float DrawHeight => 75f;
 
-    /// <summary>The editable bounds, expressed in <see cref="DragRange" /> space.</summary>
+    /// <summary>
+    /// The editable bounds, expressed in <see cref="DragRange" /> space.
+    /// </summary>
     protected abstract FloatRange Target { get; set; }
 
-    /// <summary>The current value to fill the bar to, in <see cref="DragRange" /> space.</summary>
+    /// <summary>
+    /// The current value to fill the bar to, in <see cref="DragRange" /> space.
+    /// </summary>
     protected abstract float ValuePercent { get; }
 
     protected abstract string Title { get; }
@@ -122,10 +109,12 @@ public abstract class Gizmo_RangeSlider : Gizmo
 
     protected virtual int Increments => 20;
 
-    /// <summary>When true, dragging a bound past the other pushes the other along, keeping min &lt;= max.</summary>
+    /// <summary>
+    /// When true, dragging a bound past the other pushes the other along, keeping min &lt;= max.
+    /// </summary>
     protected virtual bool EnforceOrdered => true;
 
-    protected virtual string HighlightTag => null;
+    protected virtual string? HighlightTag => null;
 
     protected virtual string BarLabel =>
         $"{Target.min.ToStringPercent("0")} - {Target.max.ToStringPercent("0")}";
@@ -144,22 +133,9 @@ public abstract class Gizmo_RangeSlider : Gizmo
     protected virtual Color BandColor => new Color();
 
     private bool HasRightClickOptions =>
-        RightClickOptions.Count > 0 || _deferredRightClickOptions.Count > 0;
+        RightClickOptions.Count > 0;
 
     public sealed override float GetWidth(float maxWidth) => Width;
-
-    /// <summary>
-    /// Register a right-click menu entry that runs <paramref name="action" /> when clicked.
-    /// For richer options (priority, icon, tooltip, disabled state) construct a
-    /// <see cref="FloatMenuOption" /> and add it to <see cref="RightClickOptions" /> directly.
-    /// </summary>
-    public void AddRightClickOption(string label, Action action)
-    {
-        // Defer options so that creation occurs on main thread. When RightClickFloatMenuOptions() is called
-        // by the engine, it is on the correct thread. If we try to construct here, it will go very wrong,
-        // IMGUI will crash, and we will experience all kinds of graphics issues, if not crash outright.
-        _deferredRightClickOptions.Add((label, action)); // no GUI work at call time
-    }
 
     public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
     {
@@ -205,6 +181,19 @@ public abstract class Gizmo_RangeSlider : Gizmo
         return Mouse.IsOver(outer)
             ? new GizmoResult(GizmoState.Mouseover)
             : new GizmoResult(GizmoState.Clear);
+    }
+
+    /// <summary>
+    /// Register a right-click menu entry that runs <paramref name="action" /> when clicked.
+    /// For richer options (priority, icon, tooltip, disabled state) construct a
+    /// <see cref="FloatMenuOption" /> and add it to <see cref="RightClickOptions" /> directly.
+    /// </summary>
+    protected void AddRightClickOption(string label, Action action)
+    {
+        // Defer options so that creation occurs on main thread. When RightClickFloatMenuOptions() is called
+        // by the engine, it is on the correct thread. If we try to construct here, it will go very wrong,
+        // IMGUI will crash, and we will experience all kinds of graphics issues, if not crash outright.
+        RightClickOptions.Add((label, action)); // no GUI work at call time
     }
 
     protected abstract string GetTooltip();
@@ -290,8 +279,7 @@ public abstract class Gizmo_RangeSlider : Gizmo
         float mousePct = SnapToIncrements(MouseToPct(barRect, ev.mousePosition.x));
 
         // Begin a drag on left-press over the bar: pick the nearer marker.
-        if (ev.type == EventType.MouseDown && ev.button == 0 && overBar
-            && !DraggingMin && !DraggingMax)
+        if (ev is { type: EventType.MouseDown, button: 0 } && overBar && !DraggingMin && !DraggingMax)
         {
             // When the two markers are (near-)coincident, pick by which side of the shared
             // position the cursor is on: left of it grabs min, right of it grabs max. This
@@ -326,7 +314,7 @@ public abstract class Gizmo_RangeSlider : Gizmo
         }
 
         // End dragging.
-        if ((DraggingMin || DraggingMax) && ev.type == EventType.MouseUp && ev.button == 0)
+        if ((DraggingMin || DraggingMax) && ev is { type: EventType.MouseUp, button: 0 })
         {
             DraggingMin = false;
             DraggingMax = false;
