@@ -47,11 +47,6 @@ public sealed class Gizmo_BatteryRange : Gizmo_RangeSlider
         set => _draggingMax = value;
     }
 
-    // Bar fill reflects the current backup power status: blue = standby, green = running, red = error.
-    // This restores the semantic colouring the legacy Command_BatteryRange gizmo used.
-    protected override Color BarColor => Resources.StatusColor(Parent.Status);
-    protected override Color BarHighlightColor => Resources.StatusColor(Parent.Status) * 1.15f;
-
     // Green = "turns on below" threshold, red = "turns off above" threshold; matches the legacy semantics.
     protected override Color MinMarkerColor => Resources.Greenish;
     protected override Color MaxMarkerColor => Resources.Reddish;
