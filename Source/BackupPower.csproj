@@ -10,6 +10,7 @@
         <!--        <PostBuildEvent>mod update</PostBuildEvent>-->
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <Nullable>enable</Nullable>
+        <Version>2.4.0</Version>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <OutputPath>..\1.6\Assemblies\</OutputPath>
