@@ -15,8 +15,8 @@ namespace BackupPower;
 // ReSharper disable once InconsistentNaming
 public sealed class Gizmo_BatteryRange : Gizmo_RangeSlider
 {
-    private static bool _draggingMin;
-    private static bool _draggingMax;
+    private static bool IsDraggingMin;
+    private static bool IsDraggingMax;
 
     private readonly List<Building_BackupPowerAttachment> _merged = [];
 
@@ -37,14 +37,14 @@ public sealed class Gizmo_BatteryRange : Gizmo_RangeSlider
 
     protected override bool DraggingMin
     {
-        get => _draggingMin;
-        set => _draggingMin = value;
+        get => IsDraggingMin;
+        set => IsDraggingMin = value;
     }
 
     protected override bool DraggingMax
     {
-        get => _draggingMax;
-        set => _draggingMax = value;
+        get => IsDraggingMax;
+        set => IsDraggingMax = value;
     }
 
     // Green = "turns on below" threshold, red = "turns off above" threshold; matches the legacy semantics.

@@ -3,8 +3,10 @@ using Verse;
 
 namespace BackupPower;
 
+// ReSharper disable once InconsistentNaming
 public static class I18n
 {
+    // ReSharper disable InconsistentNaming
     public static readonly string BackupPower = "Fluffy.BackupPower".Translate();
     public static readonly string PlaceWorker_PlaceOnPowerPlant = Translate("PlaceWorker.PlaceOnPowerPlant");
     public static readonly string PlaceWorker_PlaceOnFlickable = Translate("PlaceWorker.PlaceOnFlickable");
@@ -35,6 +37,7 @@ public static class I18n
 
     public static readonly string CommandFlickOnOffLabel = Translate("CommandFlickOnOff.Label");
     public static readonly string CommandFlickOnOffDesc = Translate("CommandFlickOnOff.Desc");
+    // ReSharper restore InconsistentNaming
 
 
     public static string AttachmentDestroyedBecauseParentGone(string label) =>
